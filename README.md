@@ -66,17 +66,63 @@ npm run check          # TypeScript
 
 ## Деплой
 
-```bash
-npm run deploy         # astro build && wrangler deploy
-```
-
 `wrangler.jsonc` носи единствения нужен binding:
 
 ```jsonc
 "ai": { "binding": "AI" }
 ```
 
-Няма KV, D1 или R2 — деплойът е с една команда и без ръчно създаване на ресурси.
+Няма KV, D1 или R2 — нищо не се създава ръчно преди първия деплой.
+
+### Ръчно
+
+```bash
+npm run deploy         # astro build && wrangler deploy
+```
+
+### През GitHub
+
+Има два начина. **Избери един** — ако включиш и двата, всеки push ще деплойва два пъти.
+
+#### Вариант А — Cloudflare Workers Builds (без секрети в GitHub)
+
+Cloudflare се свързва директно с репозиторито и билдва при всеки push.
+
+1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Import a repository**.
+2. Избери `cv-bot` и клона, от който да се деплойва (`main`).
+3. Настройки на билда:
+
+   | Поле | Стойност |
+   | --- | --- |
+   | Root directory | `/` |
+   | Build command | `npm run build` |
+   | Deploy command | `npx wrangler deploy` |
+
+   Версията на Node се взима от `.node-version` (22).
+4. Готово. Всеки push към `main` деплойва; за pull request Cloudflare качва preview версия с отделен URL.
+
+При този вариант изтрий `.github/workflows/deploy.yml` (или го остави само на
+`workflow_dispatch`), за да няма двоен деплой. `ci.yml` остава полезен —
+проверява типовете, тестовете и бъндъла на всеки PR.
+
+#### Вариант Б — GitHub Actions
+
+`.github/workflows/deploy.yml` деплойва при push към `main` и ръчно от
+**Actions → Deploy → Run workflow**. Преди първия път добави два секрета в
+**Settings → Secrets and variables → Actions → New repository secret**:
+
+| Секрет | Откъде |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → **API Tokens** → Create Token → шаблон **Edit Cloudflare Workers** |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → колоната вдясно, **Account ID** |
+
+Workflow-ът пуска тестовете и билда, преди да деплойва, и записва URL-а на
+Worker-а в GitHub Deployments. Ако секрет липсва, първата стъпка спира с ясно
+съобщение вместо да се провали по средата.
+
+`.github/workflows/ci.yml` върви на всеки pull request: TypeScript, тестове, билд
+и `wrangler deploy --dry-run` — така счупен binding или прекалено голям бъндъл
+падат на PR-а, не при деплоя. Не иска секрети и работи и от форк.
 
 ## Как е устроено
 
