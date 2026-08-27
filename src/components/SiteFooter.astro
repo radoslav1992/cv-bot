@@ -1,0 +1,92 @@
+---
+import Logo from './Logo.astro';
+
+const columns = [
+  {
+    title: 'Продукт',
+    links: [
+      { href: '/', label: 'Начало' },
+      { href: '/ceni', label: 'Цени' },
+      { href: '/chat', label: 'Чат' },
+      { href: '/tablo', label: 'Табло' },
+    ],
+  },
+  {
+    title: 'Профил',
+    links: [
+      { href: '/vhod', label: 'Вход' },
+      { href: '/registraciya', label: 'Регистрация' },
+      { href: '/zabravena-parola', label: 'Забравена парола' },
+    ],
+  },
+  {
+    title: 'Правна информация',
+    links: [
+      { href: '/pravna/obshti-usloviya', label: 'Общи условия' },
+      { href: '/pravna/poveritelnost', label: 'Поверителност' },
+      { href: '/pravna/biskvitki', label: 'Бисквитки' },
+      { href: '/pravna/gdpr', label: 'GDPR' },
+      { href: '/pravna/vazstanovyavane', label: 'Възстановяване' },
+      { href: '/pravna/otkaz-ot-otgovornost', label: 'Отказ от отговорност' },
+    ],
+  },
+];
+---
+<footer>
+  <div class="shell grid">
+    <div>
+      <Logo size={28} />
+      <p class="blurb">Разговорен помощник за CV и кандидатури на български език.</p>
+    </div>
+    {columns.map((column) => (
+      <div class="col">
+        <div class="eyebrow">{column.title}</div>
+        {column.links.map((link) => <a href={link.href}>{link.label}</a>)}
+      </div>
+    ))}
+  </div>
+  <div class="shell base">
+    <span>© 2026 CV Bot ЕООД. Всички права запазени.</span>
+    <span>София, България · hello@cvbot.bg</span>
+  </div>
+</footer>
+
+<style>
+  footer {
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .grid {
+    padding: 56px 32px 40px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+  .blurb {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted-2);
+    max-width: 280px;
+    margin-top: 14px;
+  }
+  .col { display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+  .col .eyebrow { margin-bottom: 4px; }
+  .col a { color: var(--muted); }
+  .col a:hover { color: var(--accent); }
+  .base {
+    padding: 20px 32px 40px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted-3);
+    flex-wrap: wrap;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>

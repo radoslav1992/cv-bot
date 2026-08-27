@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cv-bot",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // Workers AI — every model call in src/lib/ai.ts goes through this binding.
+  "ai": { "binding": "AI" },
+
+  "vars": {
+    // Overridable per environment; see src/lib/ai.ts for the defaults.
+    "CVBOT_CHAT_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "CVBOT_FAST_MODEL": "@cf/meta/llama-3.1-8b-instruct-fast",
+    "CVBOT_EMBEDDING_MODEL": "@cf/baai/bge-m3"
+  }
+}

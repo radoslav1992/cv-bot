@@ -1,0 +1,137 @@
+---
+import App from '../layouts/App.astro';
+import ScoreRing from '../components/ScoreRing.astro';
+---
+<App title="Табло — CV Bot" active="tablo">
+  <div class="head">
+    <div>
+      <h1 class="display" data-greeting>Здравей</h1>
+      <p class="sub" data-headline>Зареждам таблото…</p>
+    </div>
+    <div class="head-actions">
+      <button class="btn btn-soft" type="button" data-upload>Качи CV</button>
+      <input type="file" accept=".pdf,.doc,.docx,.txt,.md,.rtf,.html,.png,.jpg,.jpeg" hidden data-file />
+      <a class="btn btn-primary" href="/chat">Ново CV в чат</a>
+    </div>
+  </div>
+
+  <div class="top">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">Моите CV-та</h2>
+        <span class="count" data-cv-count>—</span>
+      </div>
+      <div class="cv-list" data-cv-list></div>
+    </div>
+
+    <div class="card-dark score">
+      <h2 class="card-title">ATS скор</h2>
+      <div class="score-top">
+        <ScoreRing score={0} size={110} fill="var(--peach)" track="rgba(246,242,233,.16)" inner="var(--green)" id="dash" />
+        <div class="score-note" data-score-note>Изчислявам…</div>
+      </div>
+      <div class="bars" data-bars></div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:18px">Препоръки</h2>
+      <div class="recs" data-recs></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:18px">История на анализите</h2>
+      <div class="history" data-history></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:18px">Кандидатури</h2>
+      <div class="apps" data-apps></div>
+    </div>
+  </div>
+</App>
+
+<style>
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
+  h1 { font-size: 42px; letter-spacing: -.02em; margin-bottom: 6px; }
+  .sub { font-size: 16px; color: var(--muted-2); }
+  .head-actions { display: flex; gap: 10px; }
+
+  .top { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .count { font-size: 14px; color: var(--muted-3); }
+  .cv-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .score { display: flex; flex-direction: column; }
+  .score-top { display: flex; align-items: center; gap: 20px; margin: 20px 0 22px; }
+  .score-note { font-size: 14px; line-height: 1.6; color: var(--green-soft); }
+  .bars { display: flex; flex-direction: column; gap: 12px; font-size: 14px; margin-top: auto; }
+
+  .bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .recs { display: flex; flex-direction: column; gap: 12px; }
+  .history { display: flex; flex-direction: column; }
+  .apps { display: flex; flex-direction: column; gap: 10px; }
+
+  @media (max-width: 1080px) {
+    .top, .bottom { grid-template-columns: 1fr; }
+    h1 { font-size: 32px; }
+  }
+</style>
+
+<style is:global>
+  .cv-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--line-2);
+    border-radius: 13px;
+    transition: border-color .15s ease;
+  }
+  .cv-row:hover { border-color: var(--green); }
+  .cv-row-name { font-size: 16px; font-weight: 500; margin-bottom: 3px; }
+  .cv-row-meta { font-size: 13px; color: var(--muted-3); }
+  .cv-row-open { font-size: 14px; color: var(--accent); cursor: pointer; background: none; border: none; font-family: var(--font-body); }
+
+  .bar-row > div:first-child { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .bar-row .val { color: var(--green-soft-2); }
+  .bar-row .val.warn { color: var(--peach); }
+
+  .rec { padding: 14px; border-radius: var(--r-md); }
+  .rec.warn { background: var(--tint-peach); }
+  .rec.good { background: var(--tint-green); }
+  .rec-points { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .rec.warn .rec-points { color: var(--accent); }
+  .rec.good .rec-points { color: var(--green); }
+  .rec-text { font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+
+  .hist-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--chip);
+    font-size: 14px;
+    gap: 12px;
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-score { color: var(--green); }
+  .hist-score.warn { color: var(--accent); }
+
+  .app-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 11px;
+    background: var(--tint-sand);
+  }
+  .app-row.hot { background: var(--tint-green); }
+  .app-row b { font-family: var(--font-display); font-size: 22px; line-height: 1; font-weight: 400; }
+  .empty { font-size: 14px; color: var(--muted-3); line-height: 1.6; }
+</style>
+
+<script src="../scripts/dashboard.ts"></script>

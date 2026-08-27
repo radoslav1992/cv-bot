@@ -1,0 +1,147 @@
+---
+import App from '../layouts/App.astro';
+import { DOC_TEMPLATES, STARTERS } from '../lib/templates';
+---
+<App title="Шаблони — CV Bot" active="shabloni">
+  <div class="head">
+    <h1 class="display">Шаблони</h1>
+    <p class="sub">Оформление за документа и готови начала за разговора с бота.</p>
+  </div>
+
+  <h2 class="section">Оформление на документа</h2>
+  <div class="templates">
+    {DOC_TEMPLATES.map((template) => (
+      <button class="template" type="button" data-template={template.id}>
+        <div class={`thumb thumb-${template.id}`} aria-hidden="true">
+          <i class="l w-60"></i>
+          <i class="l w-40 muted"></i>
+          <i class="rule"></i>
+          <i class="l w-90"></i>
+          <i class="l w-80"></i>
+          <i class="l w-70"></i>
+          <i class="l w-50 muted"></i>
+          <i class="l w-85"></i>
+        </div>
+        <div class="template-name">{template.name} <span class="check" data-check={template.id} hidden>· избран</span></div>
+        <p class="template-desc">{template.description}</p>
+        <p class="template-fit">{template.fit}</p>
+      </button>
+    ))}
+  </div>
+
+  <h2 class="section">Начала за разговор</h2>
+  <div class="starters">
+    {STARTERS.map((starter) => (
+      <div class="starter">
+        <div class="starter-audience">{starter.audience}</div>
+        <h3>{starter.title}</h3>
+        <p>{starter.prompt}</p>
+        <button class="btn btn-soft btn-sm" type="button" data-starter={starter.prompt}>Започни с това</button>
+      </div>
+    ))}
+  </div>
+</App>
+
+<style>
+  .head { margin-bottom: 28px; }
+  h1 { font-size: 42px; letter-spacing: -.02em; margin-bottom: 6px; }
+  .sub { font-size: 16px; color: var(--muted-2); }
+  .section { font-family: var(--font-display); font-size: 26px; margin: 8px 0 16px; }
+
+  .templates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 44px; }
+  .template {
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 20px;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .template:hover { border-color: var(--green); }
+  .template.current { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+  .thumb {
+    background: var(--paper);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    height: 150px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+  .thumb .l { height: 6px; border-radius: 3px; background: var(--ink-3); opacity: .8; }
+  .thumb .l.muted { background: var(--muted-4); }
+  .thumb .rule { height: 1px; background: var(--line); margin: 3px 0; }
+  .w-40 { width: 40% } .w-50 { width: 50% } .w-60 { width: 60% }
+  .w-70 { width: 70% } .w-80 { width: 80% } .w-85 { width: 85% } .w-90 { width: 90% }
+  .thumb-moderen .l:first-child { background: var(--green); height: 9px; }
+  .thumb-kompakten { gap: 4px; }
+  .thumb-kompakten .l { height: 5px; }
+
+  .template-name { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+  .check { color: var(--accent); font-weight: 400; font-size: 14px; }
+  .template-desc { font-size: 14px; line-height: 1.6; color: var(--muted); margin-bottom: 8px; }
+  .template-fit { font-size: 13px; color: var(--muted-3); }
+
+  .starters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .starter { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; display: flex; flex-direction: column; }
+  .starter-audience { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .starter h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+  .starter p { font-size: 14px; line-height: 1.6; color: var(--muted); margin-bottom: 16px; flex: 1; }
+  .starter .btn { align-self: flex-start; }
+
+  @media (max-width: 1000px) { .templates, .starters { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 680px) { .templates, .starters { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+</style>
+
+<script>
+  import { load, update } from '../lib/store';
+
+  const KEY = 'cvbot.template';
+
+  function paint(current: string): void {
+    document.querySelectorAll<HTMLElement>('[data-template]').forEach((card) => {
+      card.classList.toggle('current', card.dataset.template === current);
+    });
+    document.querySelectorAll<HTMLElement>('[data-check]').forEach((mark) => {
+      if (mark.dataset.check === current) mark.removeAttribute('hidden');
+      else mark.setAttribute('hidden', '');
+    });
+  }
+
+  const stored = (() => {
+    try { return localStorage.getItem(KEY) ?? 'klasicheski'; } catch { return 'klasicheski'; }
+  })();
+  paint(stored);
+
+  document.querySelectorAll<HTMLElement>('[data-template]').forEach((card) => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.template!;
+      try { localStorage.setItem(KEY, id); } catch { /* private mode */ }
+      paint(id);
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-starter]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const prompt = button.dataset.starter!;
+      const id = `thread_${Math.random().toString(36).slice(2, 9)}`;
+      update((state) => {
+        state.threads.unshift({
+          id,
+          title: prompt.slice(0, 34),
+          cvId: state.activeCvId,
+          updatedAt: new Date().toISOString(),
+          messages: [
+            { role: 'assistant', content: 'Здравей! Аз съм CV Bot. Разкажи ми и ще започнем.' },
+          ],
+        });
+        state.activeThreadId = id;
+      });
+      sessionStorage.setItem('cvbot.pendingPrompt', prompt);
+      window.location.href = `/chat?thread=${id}`;
+    });
+  });
+</script>

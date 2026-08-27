@@ -1,0 +1,307 @@
+---
+import App from '../layouts/App.astro';
+---
+<App title="Чат с бота — CV Bot" active="chat" variant="chat" fullHeight>
+  <div class="chat">
+    <section class="thread">
+      <header class="bar">
+        <div class="bar-title">
+          <div class="t" data-thread-title>Ново CV — Frontend Developer</div>
+          <div class="s" data-thread-sub>Разкажи ни за себе си — ботът пише вместо теб.</div>
+        </div>
+        <div class="bar-actions">
+          <button class="btn btn-outline btn-sm" type="button" data-reset>Започни отново</button>
+          <button class="btn btn-primary btn-sm" type="button" data-download>Изтегли PDF</button>
+        </div>
+      </header>
+
+      <div class="scroll" data-scroll>
+        <div class="messages" data-messages></div>
+        <div class="replies" data-replies></div>
+      </div>
+
+      <div class="composer">
+        <div class="tools" data-tools>
+          <button class="tool" type="button" data-tool="upload">Качи CV</button>
+          <button class="tool" type="button" data-tool="job">Адаптирай към обява</button>
+          <button class="tool" type="button" data-tool="letter">Мотивационно писмо</button>
+          <button class="tool" type="button" data-tool="analyze">Анализирай CV-то</button>
+          <input type="file" accept=".pdf,.doc,.docx,.txt,.md,.rtf,.html,.png,.jpg,.jpeg" hidden data-file />
+        </div>
+        <form class="box" data-form>
+          <textarea
+            class="entry"
+            rows="1"
+            placeholder="Напиши отговор или избери от предложенията…"
+            data-input
+            aria-label="Съобщение до бота"></textarea>
+          <button class="btn btn-primary" type="submit" data-send>Изпрати</button>
+        </form>
+        <p class="hint">CV Bot може да сгреши. Провери дати, имена и числа, преди да изпратиш документа.</p>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <div class="tabs">
+          <button class="tab current" type="button" data-tab="cv">Преглед</button>
+          <button class="tab" type="button" data-tab="letter" hidden data-letter-tab>Писмо</button>
+        </div>
+        <span class="pill pill-good" data-live-score>ATS —</span>
+      </div>
+
+      <div data-tab-panel="cv">
+        <div class="paper" data-doc></div>
+        <div class="next">
+          <div class="next-title">Следваща стъпка</div>
+          <div class="next-text" data-next>Разкажи ни за себе си, за да започнем.</div>
+        </div>
+        <div class="findings" data-findings></div>
+      </div>
+
+      <div data-tab-panel="letter" hidden>
+        <div class="paper letter" data-letter></div>
+        <button class="btn btn-soft btn-block btn-sm" type="button" data-copy-letter style="margin-top:14px">Копирай писмото</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Job-ad dialog: paste the posting to tailor the CV against it. -->
+  <div class="backdrop" data-modal hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 id="modal-title">Адаптиране към обява</h2>
+      <p class="modal-lede">Постави текста на обявата. Сравняваме ключовите думи, пренаписваме обобщението и получаваш отделна версия на CV-то.</p>
+      <div class="modal-fields">
+        <label class="field"><span>Компания</span><input class="input" data-job-company placeholder="Progress" /></label>
+        <label class="field"><span>Позиция</span><input class="input" data-job-position placeholder="Senior Frontend Developer" /></label>
+      </div>
+      <label class="field" style="margin-top:14px">
+        <span>Текст на обявата</span>
+        <textarea class="textarea" data-job-text placeholder="Постави пълния текст на обявата тук…"></textarea>
+      </label>
+      <p class="modal-error" data-modal-error hidden></p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" type="button" data-modal-close>Откажи</button>
+        <button class="btn btn-primary" type="button" data-modal-submit>Адаптирай</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" data-toast hidden></div>
+</App>
+
+<style>
+  .chat { display: grid; grid-template-columns: 1fr 400px; flex: 1; min-height: 0; overflow: hidden; }
+  .thread { display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  .bar {
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .bar-title .t { font-size: 16px; font-weight: 500; }
+  .bar-title .s { font-size: 13px; color: var(--muted-3); margin-top: 2px; }
+  .bar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .scroll { flex: 1; overflow: auto; padding: 28px 32px; }
+  .messages { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .replies { max-width: 680px; margin: 20px auto 0; display: flex; flex-wrap: wrap; gap: 8px; padding-left: 42px; }
+
+  .composer { padding: 14px 32px 20px; border-top: 1px solid var(--line); background: var(--bg); }
+  .tools { max-width: 680px; margin: 0 auto 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tool {
+    font-size: 13px;
+    padding: 7px 13px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line-3);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .tool:hover { border-color: var(--green); color: var(--green); }
+  .box {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line-3);
+    border-radius: 14px;
+    padding: 6px 6px 6px 18px;
+  }
+  .box:focus-within { border-color: var(--green); }
+  .entry {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    border: none;
+    background: none;
+    outline: none;
+    resize: none;
+    padding: 12px 0;
+    max-height: 160px;
+    color: var(--ink);
+  }
+  .entry::placeholder { color: var(--muted-4); }
+  .box .btn { padding: 11px 18px; border-radius: 10px; font-size: 14px; }
+  .hint { max-width: 680px; margin: 10px auto 0; font-size: 12px; color: var(--muted-4); }
+
+  .panel { border-left: 1px solid var(--line); background: var(--bg); overflow: auto; padding: 24px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .tabs { display: flex; gap: 4px; }
+  .tab {
+    font-size: 13px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--muted-3);
+    background: none;
+    border: none;
+    padding: 4px 0;
+    margin-right: 12px;
+    cursor: pointer;
+  }
+  .tab.current { color: var(--green); border-bottom: 2px solid var(--green); }
+
+  .paper {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 26px 24px;
+    box-shadow: var(--shadow-paper);
+  }
+  .letter { font-size: 12.5px; line-height: 1.7; color: var(--ink-2); white-space: pre-line; }
+
+  .next { margin-top: 16px; background: var(--tint-peach); border-radius: var(--r-md); padding: 16px; }
+  .next-title { font-size: 13px; font-weight: 500; color: var(--accent); margin-bottom: 5px; }
+  .next-text { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
+  .findings { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 33, 28, .45);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    z-index: 90;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    padding: 28px;
+    width: min(640px, 100%);
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: var(--shadow-card);
+  }
+  .modal h2 { font-family: var(--font-display); font-size: 28px; margin-bottom: 8px; }
+  .modal-lede { font-size: 14px; line-height: 1.6; color: var(--muted); margin-bottom: 20px; }
+  .modal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-error { margin-top: 12px; font-size: 14px; color: var(--accent); background: var(--tint-peach); padding: 10px 12px; border-radius: 10px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--green);
+    color: var(--on-green);
+    padding: 12px 20px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    z-index: 95;
+    box-shadow: var(--shadow-card);
+    max-width: 90vw;
+  }
+
+  @media (max-width: 1100px) {
+    .chat { grid-template-columns: 1fr; }
+    .panel { display: none; }
+  }
+  @media (max-width: 900px) {
+    /* Leave room for the sidebar toggle that App.astro pins to the top left. */
+    .bar { padding-left: 66px; }
+  }
+  @media (max-width: 700px) {
+    .bar { padding: 14px 16px 14px 66px; flex-wrap: wrap; }
+    .scroll { padding: 20px 16px; }
+    .composer { padding: 12px 16px 16px; }
+    .replies { padding-left: 0; }
+  }
+</style>
+
+<style is:global>
+  /* Message bubbles and the CV document are rendered from script, so their
+     styles have to be global rather than scoped. */
+  .msg-user { display: flex; justify-content: flex-end; }
+  .msg-user > div {
+    max-width: 78%;
+    background: var(--green);
+    color: var(--on-green);
+    padding: 14px 18px;
+    border-radius: 16px 16px 4px 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  .msg-bot { display: flex; gap: 12px; align-items: flex-start; }
+  .msg-avatar {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--green);
+    color: var(--on-green);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .msg-body {
+    max-width: 82%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 14px 18px;
+    border-radius: 4px 16px 16px 16px;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+  .msg-body p { margin: 0 0 10px; }
+  .msg-body p:last-child { margin-bottom: 0; }
+  .msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .msg-action {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    background: var(--tint-green);
+    color: var(--green);
+  }
+  .msg-error .msg-body { background: var(--tint-peach); border-color: var(--tint-peach); color: var(--accent); }
+
+  .typing { display: inline-flex; gap: 4px; align-items: center; height: 20px; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted-3); animation: cvb-dots 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; }
+  .typing i:nth-child(3) { animation-delay: .4s; }
+
+  .reply-chip {
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 10px 16px;
+    border: 1px solid var(--line-3);
+    background: var(--surface);
+    color: var(--green);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .reply-chip:hover { border-color: var(--green); background: var(--chip); }
+</style>
+
+<script src="../scripts/chat.ts"></script>

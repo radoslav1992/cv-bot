@@ -1,0 +1,145 @@
+---
+import Marketing from '../layouts/Marketing.astro';
+
+export const prerender = true;
+
+const proPrice = '19';
+
+const free = [
+  { text: '1 CV чрез разговор', included: true },
+  { text: '3 анализа на месец', included: true },
+  { text: 'Базов ATS скор', included: true },
+  { text: 'Изтегляне в PDF', included: true },
+  { text: 'Без адаптиране към обява', included: false },
+  { text: 'Без мотивационно писмо', included: false },
+];
+
+const pro = [
+  'Неограничени CV-та и версии',
+  'Неограничени анализи',
+  'Пълен ATS отчет с ключови думи',
+  'Адаптиране към конкретна обява',
+  'Мотивационни писма',
+  'Проследяване на кандидатури',
+  'Приоритетна поддръжка',
+];
+
+const faq = [
+  { q: 'Мога ли да откажа абонамента?', a: 'Да, по всяко време от Настройки. Достъпът остава до края на платения период.' },
+  { q: 'Какво става с данните ми?', a: 'CV-тата са ваши. Не ги предоставяме на работодатели и не обучаваме модели с тях.' },
+  { q: 'Издавате ли фактура?', a: 'Да. Фирмени данни се въвеждат при плащане, фактурата идва по имейл.' },
+  { q: 'Има ли план за рекрутъри?', a: 'Работим по екипен план. Пишете ни и ще ви включим в ранния достъп.' },
+];
+---
+<Marketing title="Цени — CV Bot" active="pricing" description="Безплатен план за първото CV и план Про за активно търсене на работа.">
+  <main class="shell page">
+    <div class="intro">
+      <h1 class="display">Прост избор</h1>
+      <p>Започни безплатно. Мини на Про, когато кандидатстваш активно. Отказваш се по всяко време.</p>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="eyebrow tier">Безплатен</div>
+        <div class="price">
+          <span class="amount display">0</span>
+          <span class="per">лв. / месец</span>
+        </div>
+        <p class="plan-lede">За да видиш дали ти работи.</p>
+        <a class="btn btn-outline btn-block" href="/registraciya" style="border-color:var(--green)">Създай профил</a>
+        <ul class="features">
+          {free.map((item) => (
+            <li class:list={{ off: !item.included }}>
+              <span aria-hidden="true">{item.included ? '✓' : '—'}</span>{item.text}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="plan featured">
+        <div class="ribbon">Най-избиран</div>
+        <div class="eyebrow tier light">Про</div>
+        <div class="price">
+          <span class="amount display">{proPrice}</span>
+          <span class="per light">лв. / месец</span>
+        </div>
+        <p class="plan-lede light">За активно търсене на работа.</p>
+        <a class="btn btn-cream btn-block" href="/registraciya">Вземи Про</a>
+        <ul class="features light">
+          {pro.map((item) => (
+            <li><span aria-hidden="true">✓</span>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq">
+      <h2 class="display">Често задавани въпроси</h2>
+      <div class="faq-grid">
+        {faq.map((item) => (
+          <div>
+            <h3>{item.q}</h3>
+            <p>{item.a}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+</Marketing>
+
+<style>
+  .page { padding: 80px 32px 96px; }
+  .intro { text-align: center; max-width: 620px; margin: 0 auto 56px; }
+  .intro h1 { font-size: 60px; letter-spacing: -.025em; margin-bottom: 16px; }
+  .intro p { font-size: 18px; line-height: 1.6; color: var(--muted); }
+
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; margin: 0 auto; }
+  .plan {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    padding: 36px;
+    position: relative;
+  }
+  .plan.featured { background: var(--green); border-color: var(--green); color: var(--on-green); }
+  .ribbon {
+    position: absolute;
+    top: 36px; right: 36px;
+    font-size: 12px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    background: var(--peach);
+    color: var(--on-peach);
+    padding: 5px 12px;
+    border-radius: var(--r-pill);
+  }
+  .tier { font-size: 15px; letter-spacing: .04em; margin-bottom: 20px; }
+  .tier.light { color: var(--green-soft-2); }
+  .price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+  .amount { font-size: 56px; line-height: 1; }
+  .per { font-size: 17px; color: var(--muted-3); }
+  .per.light { color: var(--green-soft-2); }
+  .plan-lede { font-size: 15px; color: var(--muted); margin-bottom: 28px; }
+  .plan-lede.light { color: var(--green-soft); }
+  .plan .btn { margin-bottom: 28px; padding: 14px; font-size: 16px; border-radius: var(--r-md); }
+
+  .features { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 15px; color: var(--ink-2); }
+  .features li { display: flex; gap: 10px; }
+  .features li > span { color: var(--green); }
+  .features li.off { color: var(--muted-4); }
+  .features li.off > span { color: var(--muted-4); }
+  .features.light { color: var(--green-soft-3); }
+  .features.light li > span { color: var(--peach); }
+
+  .faq { max-width: 900px; margin: 64px auto 0; border-top: 1px solid var(--line); padding-top: 48px; }
+  .faq h2 { font-size: 34px; margin-bottom: 28px; }
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .faq h3 { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
+  .faq p { font-size: 15px; line-height: 1.6; color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .plans, .faq-grid { grid-template-columns: 1fr; }
+    .intro h1 { font-size: 42px; }
+    .page { padding-top: 56px; }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import Base from './Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  active?: 'home' | 'pricing' | 'how' | 'dashboard';
+}
+const { title, description, active } = Astro.props;
+---
+<Base title={title} description={description}>
+  <SiteHeader active={active} />
+  <slot />
+  <SiteFooter />
+  <CookieBanner />
+</Base>

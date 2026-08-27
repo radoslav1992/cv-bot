@@ -1,0 +1,279 @@
+/* ------------------------------------------------------------------
+   CV Bot — design tokens
+   Extracted 1:1 from the Claude Design handoff (CV Bot.dc.html).
+   Every colour, radius and type size below appears in that prototype.
+   ------------------------------------------------------------------ */
+:root {
+  /* Grounds & surfaces */
+  --bg: #F6F2E9;
+  --bg-2: #F1EDE2;
+  --surface: #FFFDF7;
+  --paper: #ffffff;
+  --chip: #EDE7D8;
+
+  /* Rules */
+  --line: #E2DBCA;
+  --line-2: #E9E3D4;
+  --line-3: #CFC6B1;
+
+  /* Ink */
+  --ink: #14211C;
+  --ink-2: #26372F;
+  --ink-3: #3A4A42;
+  --muted: #4C5C54;
+  --muted-2: #6B7A72;
+  --muted-3: #8A9790;
+  --muted-4: #A9B4AE;
+
+  /* Brand green */
+  --green: #16402F;
+  --green-dark: #0E2E22;
+  --on-green: #F6F2E9;
+  --green-soft: #C3D2CA;
+  --green-soft-2: #9DB3A8;
+  --green-soft-3: #E4EBE6;
+
+  /* Accents */
+  --accent: #C6603A;
+  --peach: #E8A87C;
+  --on-peach: #3A1D0D;
+
+  /* Tints */
+  --tint-green: #F1F5F0;
+  --tint-peach: #FBF0E9;
+  --tint-sand: #F4F1E7;
+
+  /* Type */
+  --font-display: 'Instrument Serif', 'Times New Roman', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Radii */
+  --r-sm: 9px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 20px;
+  --r-2xl: 24px;
+  --r-pill: 100px;
+
+  /* Elevation */
+  --shadow-card: 0 24px 60px -32px rgba(20, 33, 28, .35);
+  --shadow-paper: 0 16px 40px -28px rgba(20, 33, 28, .4);
+
+  --shell: 1180px;
+}
+
+* { box-sizing: border-box; }
+
+/* Several components toggle visibility with the `hidden` attribute while their
+   class also sets `display` (grid/flex). Author rules beat the UA `[hidden]`
+   rule, which would leave invisible overlays intercepting clicks. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--green); text-decoration: none; }
+a:hover { color: var(--accent); }
+::selection { background: var(--green); color: var(--bg); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+h1, h2, h3, h4 { font-weight: 400; margin: 0; }
+p { margin: 0; }
+button { font-family: var(--font-body); }
+
+/* ---------------------------------------------------------------- Type */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -.02em;
+  line-height: 1.05;
+}
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted-3);
+}
+
+/* ------------------------------------------------------------- Layout */
+.shell {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding-inline: 32px;
+}
+
+/* ------------------------------------------------------------ Buttons */
+.btn {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.2;
+  padding: 12px 18px;
+  border-radius: 11px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-primary { background: var(--green); color: var(--on-green); border-color: var(--green); }
+.btn-primary:hover:not(:disabled) { background: var(--green-dark); border-color: var(--green-dark); }
+
+.btn-outline { background: transparent; color: var(--green); border-color: var(--line-3); }
+.btn-outline:hover:not(:disabled) { border-color: var(--green); }
+
+.btn-soft { background: var(--surface); color: var(--green); border-color: var(--line-3); }
+.btn-soft:hover:not(:disabled) { border-color: var(--green); }
+
+.btn-ghost { background: none; color: var(--green); border-color: transparent; }
+.btn-ghost:hover:not(:disabled) { background: var(--chip); }
+
+.btn-cream { background: var(--bg); color: var(--green); border-color: var(--bg); }
+.btn-cream:hover:not(:disabled) { background: var(--peach); border-color: var(--peach); }
+
+.btn-lg { font-size: 16px; padding: 15px 28px; border-radius: var(--r-md); }
+.btn-sm { font-size: 14px; padding: 9px 14px; border-radius: 10px; }
+.btn-block { width: 100%; }
+
+/* -------------------------------------------------------------- Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 26px;
+}
+.card-dark {
+  background: var(--green);
+  border: 1px solid var(--green);
+  border-radius: var(--r-lg);
+  padding: 26px;
+  color: var(--on-green);
+}
+.card-title { font-size: 17px; font-weight: 500; margin: 0; }
+
+/* --------------------------------------------------------------- Tags */
+.pill {
+  font-size: 13px;
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.pill-good { background: var(--tint-green); color: var(--green); }
+.pill-warn { background: var(--tint-peach); color: var(--accent); }
+.pill-neutral { background: var(--chip); color: var(--muted); }
+
+/* ------------------------------------------------------------- Fields */
+.field { display: block; }
+.field > span {
+  display: block;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.input, .textarea, .select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 13px 15px;
+  border: 1px solid var(--line-3);
+  background: var(--surface);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s ease;
+}
+.input:focus, .textarea:focus, .select:focus { border-color: var(--green); }
+.textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
+input[type="checkbox"] { accent-color: var(--green); }
+
+/* ------------------------------------------------------------- Meters */
+.meter {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--line);
+  overflow: hidden;
+}
+.meter > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--green); }
+.meter-on-dark { background: rgba(246, 242, 233, .16); }
+.meter-on-dark > i { background: var(--on-green); }
+
+/* ----------------------------------------------- CV document rendering */
+/* Emitted from script (chat preview, CV editor, print sheet), so these
+   selectors cannot live in a scoped component style block. */
+.doc-name { font-family: var(--font-display); font-size: 26px; line-height: 1.1; margin-bottom: 4px; }
+.doc-contact { font-size: 12px; color: var(--muted-2); margin-bottom: 18px; }
+.doc-rule { height: 1px; background: var(--line-2); margin-bottom: 16px; }
+.doc-label {
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted-3);
+  margin-bottom: 7px;
+}
+.doc-text { font-size: 12px; line-height: 1.65; color: var(--ink-2); margin-bottom: 18px; }
+.doc-entry { margin-bottom: 12px; }
+.doc-role { font-size: 12.5px; font-weight: 500; }
+.doc-period { font-size: 11.5px; color: var(--muted-3); margin-bottom: 5px; }
+.doc-bullets { margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.6; color: var(--ink-2); }
+.doc-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 18px; }
+.doc-chips span { font-size: 11px; padding: 4px 9px; border-radius: var(--r-pill); background: var(--bg-2); }
+.doc-inline { font-size: 12px; color: var(--ink-2); margin-bottom: 18px; line-height: 1.6; }
+
+.finding {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.finding b { font-weight: 500; }
+.finding.good { background: var(--tint-green); }
+.finding.good > span:first-child { color: var(--green); }
+.finding.warn { background: var(--tint-peach); }
+.finding.warn > span:first-child { color: var(--accent); }
+
+/* ------------------------------------------------------------- Motion */
+@keyframes cvb-dots { 0%, 60%, 100% { opacity: .25 } 30% { opacity: 1 } }
+@keyframes cvb-in { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+.cvb-in { animation: cvb-in .28s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ------------------------------------------------------------ Utility */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.stack { display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; }
+
+/* --------------------------------------------------------------- Print */
+@media print {
+  .no-print { display: none !important; }
+  html, body { background: #fff; }
+}

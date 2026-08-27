@@ -1,0 +1,41 @@
+---
+interface Props {
+  variant?: 'dark' | 'light';
+  size?: number;
+  href?: string;
+  label?: boolean;
+}
+const { variant = 'dark', size = 30, href = '/', label = true } = Astro.props;
+const mark = variant === 'dark'
+  ? { background: 'var(--green)', color: 'var(--on-green)' }
+  : { background: 'var(--bg)', color: 'var(--green)' };
+---
+<a class="logo" href={href} aria-label="CV Bot — начало">
+  <span
+    class="mark"
+    style={`width:${size}px;height:${size}px;border-radius:${Math.round(size * 0.3)}px;font-size:${Math.round(size * 0.56)}px;background:${mark.background};color:${mark.color}`}
+    aria-hidden="true">CV</span>
+  {label && <span class="word" style={`font-size:${Math.round(size * 0.72)}px`}>CV Bot</span>}
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    cursor: pointer;
+  }
+  .logo:hover { color: inherit; }
+  .mark {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .word {
+    font-family: var(--font-display);
+    letter-spacing: -.01em;
+  }
+</style>

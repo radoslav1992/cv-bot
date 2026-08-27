@@ -1,0 +1,25 @@
+{
+  "name": "cv-bot",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro build && wrangler dev",
+    "deploy": "astro build && wrangler deploy",
+    "check": "tsc --noEmit",
+    "cf-typegen": "wrangler types",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.2.5",
+    "astro": "^7.2.9"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.127.0"
+  }
+}

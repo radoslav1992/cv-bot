@@ -1,0 +1,54 @@
+<div class="cookie" data-cookie hidden>
+  <div>
+    <strong>Бисквитки</strong>
+    <p>Използваме само необходимите бисквитки, за да работи услугата. Аналитичните се зареждат единствено след твоето съгласие.</p>
+  </div>
+  <div class="actions">
+    <button class="btn btn-outline btn-sm" type="button" data-cookie-essential>Само необходимите</button>
+    <button class="btn btn-primary btn-sm" type="button" data-cookie-accept>Приемам всички</button>
+    <a class="link" href="/pravna/biskvitki">Политика</a>
+  </div>
+</div>
+
+<style>
+  .cookie {
+    position: fixed;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    z-index: 80;
+    margin: 0 auto;
+    max-width: 720px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-card);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .cookie strong { font-size: 15px; font-weight: 500; }
+  .cookie p { font-size: 14px; line-height: 1.55; color: var(--muted); margin-top: 4px; }
+  .actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .link { font-size: 13px; color: var(--muted-3); }
+  @media (max-width: 700px) {
+    .cookie { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .actions { flex-wrap: wrap; }
+  }
+</style>
+
+<script>
+  import { load, update } from '../lib/store';
+
+  const banner = document.querySelector<HTMLElement>('[data-cookie]');
+  if (banner && !load().cookieConsent) banner.removeAttribute('hidden');
+
+  const decide = (choice: 'accepted' | 'essential') => {
+    update((state) => { state.cookieConsent = choice; });
+    banner?.setAttribute('hidden', '');
+  };
+
+  document.querySelector('[data-cookie-accept]')?.addEventListener('click', () => decide('accepted'));
+  document.querySelector('[data-cookie-essential]')?.addEventListener('click', () => decide('essential'));
+</script>
