@@ -2,7 +2,9 @@ import { activeCV, activeThread, analysesLeft, consumeAnalysis, LIMIT_MESSAGE, l
 import { formatMessage, nextStepHint, renderCvDocument, renderFindings } from '../lib/render';
 import { scoreCV } from '../lib/ats';
 import type { AtsReport, CV, ChatMessage } from '../lib/types';
-import { emptyCV } from '../lib/cv';
+import { cvFromTemplate, emptyCV } from '../lib/cv';
+import { flowProgress, suggestionsFor, templateGreeting } from '../lib/flow';
+import { findTemplate } from '../lib/cvTemplates';
 
 const $ = <T extends HTMLElement>(selector: string): T | null => document.querySelector<T>(selector);
 
@@ -24,6 +26,8 @@ const modalError = $('[data-modal-error]')!;
 const toastEl = $('[data-toast]')!;
 const threadTitle = $('[data-thread-title]')!;
 const threadSub = $('[data-thread-sub]')!;
+const meterEl = $('[data-step-meter]')!;
+const meterFill = $('[data-step-fill]')!;
 
 const GREETING =
   'Здравей! Аз съм CV Bot. Ще направим CV, което минава през ATS филтрите и звучи като теб.\n\nОт какво да започнем?';
@@ -105,6 +109,13 @@ function renderMessages(): void {
   scrollToEnd();
 }
 
+/** Inside a template flow the script decides what can be tapped — an empty list
+ *  is a valid answer and means "type it yourself". */
+function repliesFor(fallback: string[]): string[] {
+  const progress = flowProgress(cv);
+  return progress ? suggestionsFor(progress) : fallback;
+}
+
 function renderReplies(items: string[]): void {
   repliesEl.innerHTML = '';
   if (busy) return;
@@ -135,10 +146,19 @@ function renderPanel(report?: AtsReport): void {
   }
 
   threadTitle.textContent = thread.title;
-  const filled = cv.experience.length + (cv.summary ? 1 : 0) + (cv.education.length ? 1 : 0);
-  threadSub.textContent = cv.contact.title
-    ? `${cv.contact.title} · ${filled} попълнени секции`
-    : 'Разкажи ни за себе си — ботът пише вместо теб.';
+
+  const progress = flowProgress(cv);
+  if (progress) {
+    threadSub.textContent = `${progress.label} · ${progress.section}`;
+    meterEl.hidden = false;
+    meterFill.style.width = `${Math.round(((progress.step - 1) / progress.total) * 100)}%`;
+  } else {
+    meterEl.hidden = true;
+    const filled = cv.experience.length + (cv.summary ? 1 : 0) + (cv.education.length ? 1 : 0);
+    threadSub.textContent = cv.contact.title
+      ? `${cv.contact.title} · ${filled} попълнени секции`
+      : 'Разкажи ни за себе си — ботът пише вместо теб.';
+  }
 }
 
 function setBusy(next: boolean): void {
@@ -264,7 +284,8 @@ async function send(text: string): Promise<void> {
   persist();
   setBusy(false);
   renderPanel(report);
-  renderReplies(replies);
+
+  renderReplies(repliesFor(replies));
 }
 
 // -------------------------------------------------------------------- tools
@@ -300,7 +321,7 @@ async function uploadCV(file: File): Promise<void> {
     thread.messages.push(botMessage);
     messagesEl.append(messageNode(botMessage));
     renderPanel(report);
-    renderReplies(['Подобри описанията', 'Адаптирай към обява', 'Какво липсва?']);
+    renderReplies(repliesFor(['Подобри описанията', 'Адаптирай към обява', 'Какво липсва?']));
   } catch (error) {
     const message = `Файлът не можа да бъде обработен: ${error instanceof Error ? error.message : 'неизвестна грешка'}`;
     const botMessage: ChatMessage = { role: 'assistant', content: message };
@@ -370,7 +391,7 @@ async function tailor(company: string, position: string, jobText: string): Promi
     });
 
     renderPanel(payload.after);
-    renderReplies(['Напиши мотивационно писмо', 'Изтегли PDF', 'Какво още да добавя?']);
+    renderReplies(repliesFor(['Напиши мотивационно писмо', 'Изтегли PDF', 'Какво още да добавя?']));
   } catch (error) {
     const botMessage: ChatMessage = {
       role: 'assistant',
@@ -518,14 +539,21 @@ document.querySelectorAll<HTMLElement>('[data-tab]').forEach((tab) => {
 
 $('[data-reset]')?.addEventListener('click', () => {
   if (!confirm('Да започнем ли нов разговор? Текущият остава в списъка „Скорошни“.')) return;
-  const fresh = emptyCV('Ново CV');
+  const template = findTemplate(cv.templateId);
+  const fresh = template ? cvFromTemplate(template) : emptyCV('Ново CV');
   const id = `thread_${Math.random().toString(36).slice(2, 9)}`;
-  thread = { id, title: 'Нов разговор', cvId: fresh.id, updatedAt: new Date().toISOString(), messages: [{ role: 'assistant', content: GREETING }] };
+  thread = {
+    id,
+    title: template ? template.name : 'Нов разговор',
+    cvId: fresh.id,
+    updatedAt: new Date().toISOString(),
+    messages: [{ role: 'assistant', content: template ? templateGreeting(template) : GREETING }],
+  };
   cv = fresh;
   persist();
   renderMessages();
   renderPanel();
-  renderReplies(DEFAULT_REPLIES);
+  renderReplies(repliesFor(DEFAULT_REPLIES));
 });
 
 $('[data-download]')?.addEventListener('click', () => {
@@ -604,10 +632,34 @@ if (window.matchMedia('(max-width: 700px)').matches) {
 }
 
 // ------------------------------------------------------------------ startup
-if (!thread.messages.length) thread.messages.push({ role: 'assistant', content: GREETING });
+// Opening /chat?template=frontend starts a fresh CV on that template.
+const requestedTemplate = findTemplate(new URLSearchParams(location.search).get('template') ?? undefined);
+if (requestedTemplate && !cv.templateId) {
+  cv = cvFromTemplate(requestedTemplate);
+  thread = {
+    id: `thread_${Math.random().toString(36).slice(2, 9)}`,
+    title: requestedTemplate.name,
+    cvId: cv.id,
+    updatedAt: new Date().toISOString(),
+    messages: [{ role: 'assistant', content: templateGreeting(requestedTemplate) }],
+  };
+  persist();
+  history.replaceState(null, '', `/chat?thread=${thread.id}`);
+}
+
+if (!thread.messages.length) {
+  const template = findTemplate(cv.templateId);
+  thread.messages.push({ role: 'assistant', content: template ? templateGreeting(template) : GREETING });
+}
+
 renderMessages();
 renderPanel();
-renderReplies(thread.messages.length <= 1 ? DEFAULT_REPLIES : ['Продължи', 'Анализирай CV-то', 'Адаптирай към обява']);
+
+renderReplies(
+  repliesFor(
+    thread.messages.length <= 1 ? DEFAULT_REPLIES : ['Продължи', 'Анализирай CV-то', 'Адаптирай към обява'],
+  ),
+);
 
 // A starter picked on /shabloni opens the chat with that message already sent.
 const pending = sessionStorage.getItem('cvbot.pendingPrompt');

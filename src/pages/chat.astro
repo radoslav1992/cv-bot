@@ -8,6 +8,7 @@ import App from '../layouts/App.astro';
         <div class="bar-title">
           <div class="t" data-thread-title>Ново CV — Frontend Developer</div>
           <div class="s" data-thread-sub>Разкажи ни за себе си — ботът пише вместо теб.</div>
+          <div class="step-meter" data-step-meter hidden><i data-step-fill style="width:0"></i></div>
         </div>
         <div class="bar-actions">
           <button class="btn btn-outline btn-sm" type="button" data-reset>Започни отново</button>
@@ -105,6 +106,22 @@ import App from '../layouts/App.astro';
   }
   .bar-title .t { font-size: 16px; font-weight: 500; }
   .bar-title .s { font-size: 13px; color: var(--muted-3); margin-top: 2px; }
+  .step-meter {
+    height: 3px;
+    width: 190px;
+    max-width: 100%;
+    border-radius: var(--r-pill);
+    background: var(--line);
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .step-meter > i {
+    display: block;
+    height: 100%;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    transition: width .3s ease;
+  }
   .bar-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
   .scroll { flex: 1; overflow: auto; padding: 28px 32px; }

@@ -62,6 +62,9 @@ export interface CV {
   certificates: string[];
   targetJob?: TargetJob;
   coverLetter?: string;
+  /** Set when the CV was started from a ready-made template — drives the
+   *  guided question script in the chat. See src/lib/cvTemplates.ts. */
+  templateId?: string;
   /** Set when the CV came from an uploaded file — feeds the format score. */
   sourceFormatFlags?: FormatFlags;
 }

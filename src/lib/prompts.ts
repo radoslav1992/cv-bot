@@ -1,5 +1,6 @@
 import type { CV } from './types';
 import { cvToPlainText } from './ats';
+import { flowProgress } from './flow';
 
 export const SYSTEM_PROMPT = `Ти си CV Bot — консултант за автобиографии, който говори САМО на български език (освен когато потребителят изрично поиска CV на друг език).
 
@@ -26,6 +27,49 @@ export const COVER_LETTER_SYSTEM = `Пишеш мотивационни писм
 
 export const EXTRACT_SYSTEM = `Извличаш структурирани данни от автобиография. Връщаш САМО валиден JSON без коментари, точно по подадената схема. Ако дадено поле липсва в текста, връщаш празен низ или празен масив — никога не измисляш данни.`;
 
+/** When the CV came from a template the conversation is a script, not an open
+ *  interview: one prepared question at a time, in order, and the bot's only job
+ *  is to record what comes back. */
+function templateScript(cv: CV): string | null {
+  const progress = flowProgress(cv);
+  if (!progress) return null;
+
+  const checklist = progress.fields
+    .map((field, index) => {
+      const state = progress.remaining.includes(field.key) ? 'ЧАКА' : 'ГОТОВО';
+      return `${index + 1}. [${state}] ${field.section} — ${field.question}`;
+    })
+    .join('\n');
+
+  if (!progress.current) {
+    return [
+      `Работиш по готов шаблон „${progress.template.name}“. Всички въпроси са минати.`,
+      checklist,
+      '',
+      'Не задавай нови въпроси от списъка. Предложи следващата стъпка: адаптиране към конкретна обява, мотивационно писмо или изтегляне на PDF.',
+    ].join('\n');
+  }
+
+  return [
+    `Работиш по готов шаблон „${progress.template.name}“ (${progress.label}).`,
+    'Сценарий на разговора:',
+    checklist,
+    '',
+    `СЛЕДВАЩ ВЪПРОС (задай точно него, със свои думи, и нищо друго): ${progress.current.question}`,
+    progress.template.achievementHints.length && progress.current.key === 'achievements'
+      ? `Примери за постижения в тази роля, които можеш да покажеш като образец — но НЕ ги записвай като факти за потребителя: ${progress.template.achievementHints.join(' | ')}`
+      : '',
+    '',
+    'Правила за сценария:',
+    '- Питаш за едно нещо наведнъж и точно по реда на списъка.',
+    '- Щом получиш отговор, веднага го записваш със съответния инструмент, преди да зададеш следващия въпрос.',
+    '- Ако потребителят иска да пропусне стъпка, приемаш и минаваш нататък.',
+    '- Не измисляш данни. Шаблонът дава структура и примери, не факти.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 /** Compact snapshot of the CV injected into the system turn so the model always
  *  knows what has already been captured. */
 export function cvContext(cv: CV): string {
@@ -39,6 +83,8 @@ export function cvContext(cv: CV): string {
   if (!cv.education.length) missing.push('образование');
   if (cv.skills.length < 5) missing.push('умения');
   if (!cv.languages.length) missing.push('езици');
+
+  const script = templateScript(cv);
 
   return [
     'Текущо състояние на CV-то (JSON):',
@@ -55,8 +101,15 @@ export function cvContext(cv: CV): string {
       null,
       0,
     ),
-    filled ? '' : 'CV-то е още празно — започни от целевата позиция.',
-    missing.length ? `Все още липсват: ${missing.join(', ')}.` : 'Всички основни секции са попълнени — предложи адаптиране към обява или изтегляне.',
+    script ??
+      [
+        filled ? '' : 'CV-то е още празно — започни от целевата позиция.',
+        missing.length
+          ? `Все още липсват: ${missing.join(', ')}.`
+          : 'Всички основни секции са попълнени — предложи адаптиране към обява или изтегляне.',
+      ]
+        .filter(Boolean)
+        .join('\n'),
   ]
     .filter(Boolean)
     .join('\n');
