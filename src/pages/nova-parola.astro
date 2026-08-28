@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import AuthScreen from '../components/AuthScreen.astro';
+export const prerender = true;
+---
+<Base title="Нова парола — CV Bot">
+  <AuthScreen
+    mode="reset"
+    title="Нова парола"
+    sub="Избери парола от поне 8 символа, с една цифра."
+    cta="Запази паролата"
+    fields={[
+      { name: 'password', label: 'Нова парола', type: 'password', placeholder: '••••••••', autocomplete: 'new-password' },
+      { name: 'password2', label: 'Повтори паролата', type: 'password', placeholder: '••••••••', autocomplete: 'new-password' },
+    ]}
+    altText="Проблем с линка?"
+    altLink="Заяви нов"
+    altHref="/zabravena-parola"
+  />
+</Base>

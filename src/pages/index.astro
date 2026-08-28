@@ -1,0 +1,276 @@
+---
+import Marketing from '../layouts/Marketing.astro';
+import ScoreRing from '../components/ScoreRing.astro';
+
+export const prerender = true;
+
+const steps = [
+  { n: '01', title: 'Разкажи', text: 'Отговаряш на кратки въпроси или качваш старо CV. Ботът извлича опита и уменията.', dark: false },
+  { n: '02', title: 'Оформи', text: 'Получаваш структурирано CV с ясни постижения, а не описание на задължения.', dark: false },
+  { n: '03', title: 'Адаптирай', text: 'Поставяш линк към обява — CV-то и писмото се пренастройват за нея.', dark: true },
+];
+
+const features = [
+  { title: 'CV от нула чрез разговор', text: 'Без празен документ. Ботът води интервю и пише вместо вас.' },
+  { title: 'Оценка на съществуващо CV', text: 'Скор по структура, език, постижения и четимост, с конкретни поправки.' },
+  { title: 'ATS оптимизация', text: 'Проверка за формат, ключови думи и елементи, които машините не четат.' },
+  { title: 'Адаптиране към обява', text: 'Отделна версия за всяка позиция, с подредени по важност акценти.' },
+  { title: 'Мотивационно писмо', text: 'Генерира писмо в същия тон, свързано с изискванията на конкретния работодател.', wide: true },
+];
+
+const audiences = [
+  { title: 'Студенти', text: 'Първа работа без опит за описване' },
+  { title: 'Специалисти', text: 'Смяна на работа със силни резултати' },
+  { title: 'IT профили', text: 'Технологии, проекти, стек' },
+  { title: 'Мениджъри', text: 'Екипи, бюджети, отговорност' },
+  { title: 'HR и рекрутъри', text: 'Скрининг на кандидати наедро' },
+];
+
+const stats = [
+  { value: '14 200+', label: 'създадени CV-та' },
+  { value: '3,1×', label: 'повече покани за интервю' },
+  { value: '8 мин.', label: 'средно време за готово CV' },
+  { value: '100%', label: 'на български език' },
+];
+---
+<Marketing title="CV Bot — CV, което минава през ATS" active="home">
+  <main>
+    <section class="hero shell">
+      <div>
+        <div class="badge">
+          <span class="dot" aria-hidden="true"></span>
+          Разговорен AI на български
+        </div>
+        <h1 class="display">Напиши CV, което<br />минава през <em>ATS</em></h1>
+        <p class="lede">
+          Разкажи ни за себе си в чат — ние подреждаме, формулираме и оптимизираме. После адаптираме
+          CV-то към всяка обява и пишем мотивационното писмо.
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary btn-lg" href="/chat">Започни разговор</a>
+          <a class="btn btn-outline btn-lg" href="/ceni">Виж плановете</a>
+        </div>
+        <p class="fineprint">Безплатно за първото CV. Без карта.</p>
+      </div>
+
+      <div class="preview">
+        <div class="preview-head">
+          <span class="eyebrow">Анализ на CV</span>
+          <span class="ago">преди 2 мин.</span>
+        </div>
+        <div class="preview-score">
+          <ScoreRing score={82} size={96} />
+          <div>
+            <div class="verdict">Добра съвместимост</div>
+            <div class="job">Обява: Senior Frontend Developer, Sofia</div>
+          </div>
+        </div>
+        <div class="findings">
+          <div class="finding good">
+            <span aria-hidden="true">✓</span>
+            <span>Ключовите умения от обявата присъстват в първите 200 думи.</span>
+          </div>
+          <div class="finding warn">
+            <span aria-hidden="true">!</span>
+            <span>Липсват измерими резултати в 2 от 3 позиции. Добави числа.</span>
+          </div>
+          <div class="finding warn">
+            <span aria-hidden="true">!</span>
+            <span>Таблиците в горния колонтитул няма да бъдат прочетени от ATS.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust">
+      <div class="shell trust-grid">
+        {stats.map((stat) => (
+          <div>
+            <div class="stat display">{stat.value}</div>
+            <div class="stat-label">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="shell block" id="kak-raboti">
+      <h2 class="display h2">Три стъпки, един разговор</h2>
+      <p class="section-lede">Не се борите с формуляри. Ботът задава въпросите, вие отговаряте свободно.</p>
+      <div class="steps">
+        {steps.map((step) => (
+          <div class:list={['step', { dark: step.dark }]}>
+            <div class="step-n">{step.n}</div>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="shell band-grid">
+        <div>
+          <h2 class="display h2">Какво прави ботът</h2>
+          <p class="section-lede">Пет функции, които покриват целия път от чиста страница до подадена кандидатура.</p>
+        </div>
+        <div class="features">
+          {features.map((feature) => (
+            <div class:list={['feature', { wide: feature.wide }]}>
+              <h3>{feature.title}</h3>
+              <p>{feature.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="shell block">
+      <h2 class="display h2" style="margin-bottom:40px">За кого е</h2>
+      <div class="audiences">
+        {audiences.map((audience) => (
+          <div class="audience">
+            <div class="audience-title">{audience.title}</div>
+            <div class="audience-text">{audience.text}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="shell closing-wrap">
+      <div class="closing">
+        <div>
+          <h2 class="display h2">Първото CV е безплатно</h2>
+          <p>Отваряш чата, отговаряш на няколко въпроса и изтегляш готов PDF. Ако ти хареса, продължаваш с Про.</p>
+        </div>
+        <a class="btn btn-cream btn-lg" href="/registraciya">Създай профил</a>
+      </div>
+    </section>
+  </main>
+</Marketing>
+
+<style>
+  .hero {
+    padding: 96px 32px 72px;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: var(--r-pill);
+    background: var(--chip);
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1 { font-size: 76px; line-height: .98; letter-spacing: -.025em; margin-bottom: 24px; }
+  h1 em { color: var(--accent); }
+  .lede { font-size: 19px; line-height: 1.6; color: var(--muted); margin-bottom: 36px; max-width: 480px; text-wrap: pretty; }
+  .cta { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .fineprint { font-size: 14px; color: var(--muted-3); }
+
+  .preview {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .ago { font-size: 13px; color: var(--muted-3); }
+  .preview-score { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+  .verdict { font-size: 17px; font-weight: 500; margin-bottom: 4px; }
+  .job { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .findings { display: flex; flex-direction: column; gap: 10px; }
+  .finding {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .finding.good { background: var(--tint-green); }
+  .finding.good > span:first-child { color: var(--green); font-size: 15px; }
+  .finding.warn { background: var(--tint-peach); }
+  .finding.warn > span:first-child { color: var(--accent); font-size: 15px; }
+
+  .trust { border-block: 1px solid var(--line); background: var(--bg-2); }
+  .trust-grid { padding: 28px 32px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .stat { font-size: 34px; line-height: 1; }
+  .stat-label { font-size: 14px; color: var(--muted-3); margin-top: 4px; }
+
+  .block { padding-block: 88px; }
+  .h2 { font-size: 46px; letter-spacing: -.02em; }
+  .section-lede { font-size: 17px; color: var(--muted); margin-top: 12px; max-width: 560px; line-height: 1.6; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 28px; }
+  .step-n { font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-bottom: 16px; }
+  .step h3 { font-size: 20px; font-weight: 500; margin-bottom: 10px; }
+  .step p { font-size: 15px; line-height: 1.6; color: var(--muted); }
+  .step.dark { background: var(--green); border-color: var(--green); color: var(--on-green); }
+  .step.dark .step-n { color: var(--peach); }
+  .step.dark p { color: var(--green-soft); }
+
+  .band { background: var(--bg-2); border-block: 1px solid var(--line); }
+  .band-grid { padding: 88px 32px; display: grid; grid-template-columns: .85fr 1.15fr; gap: 56px; }
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .feature { background: var(--surface); padding: 26px; }
+  .feature.wide { grid-column: span 2; }
+  .feature h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+  .feature p { font-size: 14px; line-height: 1.6; color: var(--muted); }
+
+  .audiences { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .audience { border: 1px solid var(--line); border-radius: 14px; padding: 22px 18px; background: var(--surface); }
+  .audience-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .audience-text { font-size: 13px; color: var(--muted-3); line-height: 1.5; }
+
+  .closing-wrap { padding: 0 32px 96px; }
+  .closing {
+    background: var(--green);
+    border-radius: var(--r-2xl);
+    padding: 64px;
+    color: var(--on-green);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: center;
+  }
+  .closing h2 { font-size: 44px; margin-bottom: 12px; }
+  .closing p { font-size: 17px; color: var(--green-soft); max-width: 520px; line-height: 1.55; }
+
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 56px; }
+    h1 { font-size: 52px; }
+    .band-grid { grid-template-columns: 1fr; gap: 32px; padding-block: 64px; }
+    .steps { grid-template-columns: 1fr; }
+    .trust-grid { grid-template-columns: 1fr 1fr; }
+    .audiences { grid-template-columns: 1fr 1fr; }
+    .closing { grid-template-columns: 1fr; padding: 40px; }
+    .closing h2 { font-size: 34px; }
+    .h2 { font-size: 34px; }
+    .block { padding-block: 56px; }
+  }
+  @media (max-width: 560px) {
+    h1 { font-size: 40px; }
+    .features { grid-template-columns: 1fr; }
+    .feature.wide { grid-column: auto; }
+    .audiences { grid-template-columns: 1fr; }
+  }
+</style>

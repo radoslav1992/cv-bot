@@ -1,0 +1,104 @@
+---
+import Logo from './Logo.astro';
+
+interface Props { active?: 'home' | 'pricing' | 'how' | 'dashboard' }
+const { active } = Astro.props;
+
+const links = [
+  { href: '/', label: 'Начало', key: 'home' },
+  { href: '/ceni', label: 'Цени', key: 'pricing' },
+  { href: '/#kak-raboti', label: 'Как работи', key: 'how' },
+  { href: '/tablo', label: 'Табло', key: 'dashboard' },
+];
+---
+<header>
+  <div class="bar shell">
+    <Logo size={30} />
+    <nav aria-label="Основна навигация">
+      {links.map((link) => (
+        <a href={link.href} class:list={['nav-link', { current: active === link.key }]}>{link.label}</a>
+      ))}
+    </nav>
+    <div class="actions">
+      <a class="btn btn-ghost" href="/vhod">Вход</a>
+      <a class="btn btn-primary" href="/registraciya">Опитай безплатно</a>
+    </div>
+    <button class="burger" type="button" aria-label="Меню" aria-expanded="false" data-burger>
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="drawer" data-drawer hidden>
+    {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    <a href="/vhod">Вход</a>
+    <a href="/registraciya" class="strong">Опитай безплатно</a>
+  </div>
+</header>
+
+<style>
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(246, 242, 233, .88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    padding-block: 16px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+  nav {
+    display: flex;
+    gap: 28px;
+    font-size: 15px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .nav-link { color: var(--muted); }
+  .nav-link:hover { color: var(--accent); }
+  .nav-link.current { color: var(--green); font-weight: 500; }
+  .actions { display: flex; align-items: center; gap: 8px; }
+  .actions .btn { padding: 10px 16px; border-radius: 10px; font-size: 15px; }
+  .actions .btn-primary { padding: 10px 20px; }
+
+  .burger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .burger span { width: 20px; height: 2px; background: var(--green); border-radius: 2px; }
+
+  .drawer {
+    display: none;
+    flex-direction: column;
+    padding: 8px 32px 20px;
+    gap: 4px;
+    border-top: 1px solid var(--line);
+  }
+  .drawer a { padding: 12px 0; font-size: 16px; color: var(--muted); border-bottom: 1px solid var(--line-2); }
+  .drawer a.strong { color: var(--green); font-weight: 500; border-bottom: none; }
+
+  @media (max-width: 860px) {
+    nav, .actions { display: none; }
+    .burger { display: flex; }
+    .drawer:not([hidden]) { display: flex; }
+  }
+</style>
+
+<script>
+  const burger = document.querySelector<HTMLButtonElement>('[data-burger]');
+  const drawer = document.querySelector<HTMLElement>('[data-drawer]');
+  burger?.addEventListener('click', () => {
+    const open = drawer?.hasAttribute('hidden');
+    if (open) drawer?.removeAttribute('hidden');
+    else drawer?.setAttribute('hidden', '');
+    burger.setAttribute('aria-expanded', String(Boolean(open)));
+  });
+</script>

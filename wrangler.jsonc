@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cv-bot",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // Workers AI — every model call in src/lib/ai.ts goes through this binding.
+  "ai": { "binding": "AI" },
+
+  // Every model is a plain variable, so it can be swapped here or overridden in
+  // the Cloudflare dashboard (Settings → Variables) without touching the code.
+  "vars": {
+    // Разговор и извикване на инструменти.
+    "CVBOT_CHAT_MODEL": "openai/gpt-5.6-luna",
+    // Кратки предложения, пренаписвания и извличане от качен файл.
+    "CVBOT_FAST_MODEL": "openai/gpt-5.6-luna",
+    // Ембединги за сравнение CV ↔ обява (Luna не прави ембединги).
+    "CVBOT_EMBEDDING_MODEL": "@cf/baai/bge-m3",
+    // "auto" разпознава API-то по идентификатора на модела: "@cf/…" говори
+    // chat completions, партньорските (openai/…) — Responses API. Тук се
+    // задава "chat" или "responses" само ако автоматичното познаване сбърка.
+    "CVBOT_MODEL_DIALECT": "auto"
+  }
+}

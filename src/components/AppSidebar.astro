@@ -1,0 +1,127 @@
+---
+import Logo from './Logo.astro';
+
+interface Props {
+  active: 'tablo' | 'chat' | 'cv' | 'kandidaturi' | 'shabloni' | 'nastroyki';
+  variant?: 'default' | 'chat';
+}
+const { active, variant = 'default' } = Astro.props;
+
+const items = [
+  { href: '/tablo', label: 'Табло', key: 'tablo' },
+  { href: '/chat', label: 'Чат с бота', key: 'chat' },
+  { href: '/cv', label: 'Моите CV-та', key: 'cv' },
+  { href: '/kandidaturi', label: 'Кандидатури', key: 'kandidaturi' },
+  { href: '/shabloni', label: 'Шаблони', key: 'shabloni' },
+  { href: '/nastroyki', label: 'Настройки', key: 'nastroyki' },
+];
+---
+<aside>
+  <Logo variant="light" size={28} />
+
+  <nav aria-label="Навигация в приложението">
+    {items.map((item) => (
+      <a href={item.href} class:list={['item', { current: active === item.key }]}>{item.label}</a>
+    ))}
+  </nav>
+
+  {variant === 'chat' && (
+    <div class="recents">
+      <div class="eyebrow-light">Скорошни</div>
+      <div class="recent-list" data-recent-list>
+        <a class="recent current" href="/chat">Ново CV — Frontend</a>
+      </div>
+    </div>
+  )}
+
+  {variant === 'default' && (
+    <div class="plan" data-plan-card>
+      <div class="plan-name" data-plan-name>Безплатен план</div>
+      <div class="plan-usage" data-plan-usage>2 от 3 анализа използвани този месец</div>
+      <div class="meter meter-on-dark" style="margin-bottom:14px"><i data-plan-meter style="width:66%;background:var(--peach)"></i></div>
+      <a class="btn btn-cream btn-block btn-sm" href="/ceni" data-plan-cta>Надгради до Про</a>
+    </div>
+  )}
+
+  <a class="user" href="/nastroyki">
+    <span class="avatar" data-user-initials>МП</span>
+    <span class="uname" data-user-name>Мария Петрова</span>
+  </a>
+</aside>
+
+<style>
+  aside {
+    background: var(--green);
+    color: var(--on-green);
+    padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    overflow: auto;
+  }
+  nav { display: flex; flex-direction: column; gap: 2px; font-size: 15px; }
+  .item {
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: var(--green-soft);
+    cursor: pointer;
+  }
+  .item:hover { background: rgba(246, 242, 233, .08); color: var(--on-green); }
+  .item.current { background: rgba(246, 242, 233, .12); color: var(--on-green); }
+
+  .recents { display: flex; flex-direction: column; gap: 10px; }
+
+
+  .plan {
+    margin-top: auto;
+    background: rgba(246, 242, 233, .08);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .plan-name { font-size: 14px; margin-bottom: 6px; }
+  .plan-usage { font-size: 13px; color: var(--green-soft-2); line-height: 1.5; margin-bottom: 12px; }
+
+  .user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--on-green);
+    border-radius: 10px;
+  }
+  .user:hover { background: rgba(246, 242, 233, .08); color: var(--on-green); }
+  .plan + .user { margin-top: 0; }
+  aside > .user:not(.plan + .user) { margin-top: auto; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--peach); color: var(--on-peach);
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 500; flex-shrink: 0;
+  }
+  .uname { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+
+<style is:global>
+  /* The recent-thread links are rendered from script, so they never receive
+     the scoped component attribute. */
+  .eyebrow-light {
+    font-size: 13px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--green-soft-2);
+    padding: 0 12px;
+  }
+  .recent-list { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+  .recent {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: var(--green-soft-2);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .recent:hover { background: rgba(246, 242, 233, .06); color: var(--on-green); }
+  .recent.current { color: var(--green-soft-3); background: rgba(246, 242, 233, .08); }
+</style>

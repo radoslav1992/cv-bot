@@ -1,0 +1,159 @@
+---
+import Base from '../layouts/Base.astro';
+export const prerender = true;
+---
+<Base title="Изтегляне на CV — CV Bot" bodyBackground="#EDEAE1">
+  <div class="toolbar no-print">
+    <div class="left">
+      <a class="btn btn-ghost btn-sm" href="/cv">← Назад</a>
+      <span class="doc-title" data-title>CV</span>
+    </div>
+    <div class="right">
+      <label class="picker">
+        Оформление
+        <select class="select" data-template>
+          <option value="klasicheski">Класически</option>
+          <option value="moderen">Модерен</option>
+          <option value="kompakten">Компактен</option>
+        </select>
+      </label>
+      <label class="picker check"><input type="checkbox" data-with-letter /> С мотивационно писмо</label>
+      <button class="btn btn-primary btn-sm" type="button" data-print>Изтегли PDF</button>
+    </div>
+  </div>
+
+  <p class="tip no-print">
+    В диалога за печат избери „Запази като PDF“. Документът е една колона, без таблици и без изображения —
+    точно каквото ATS системите четат безпроблемно.
+  </p>
+
+  <div class="sheet" data-sheet>
+    <article class="page" data-page></article>
+    <article class="page letter-page" data-letter-page hidden></article>
+  </div>
+</Base>
+
+<style>
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .left, .right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .doc-title { font-size: 15px; font-weight: 500; }
+  .picker { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .picker .select { padding: 8px 10px; font-size: 14px; width: auto; }
+  .picker.check { gap: 6px; }
+  .tip { max-width: 820px; margin: 20px auto 0; padding: 0 24px; font-size: 13px; line-height: 1.6; color: var(--muted-2); }
+
+  .sheet { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    max-width: 100%;
+    background: #fff;
+    padding: 18mm 20mm;
+    box-shadow: 0 24px 60px -32px rgba(20, 33, 28, .5);
+    color: #14211C;
+  }
+
+  @page { size: A4; margin: 14mm; }
+  @media print {
+    .toolbar, .tip { display: none !important; }
+    .sheet { padding: 0; gap: 0; }
+    .page { width: auto; min-height: 0; box-shadow: none; padding: 0; }
+    .letter-page { break-before: page; }
+  }
+</style>
+
+<style is:global>
+  /* Print document — deliberately one column, no tables, no images. */
+  .page .doc-name { font-family: var(--font-display); font-size: 34px; line-height: 1.1; margin-bottom: 6px; }
+  .page .doc-contact { font-size: 12.5px; color: #4C5C54; margin-bottom: 20px; }
+  .page .doc-rule { height: 1px; background: #D8D2C2; margin-bottom: 20px; }
+  .page .doc-label {
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: #6B7A72; margin: 20px 0 8px; font-weight: 500;
+  }
+  .page .doc-text { font-size: 13px; line-height: 1.65; margin-bottom: 4px; }
+  .page .doc-entry { margin-bottom: 14px; break-inside: avoid; }
+  .page .doc-role { font-size: 13.5px; font-weight: 500; }
+  .page .doc-period { font-size: 12px; color: #6B7A72; margin-bottom: 5px; }
+  .page .doc-bullets { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; }
+  .page .doc-bullets li { margin-bottom: 3px; }
+  .page .doc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .page .doc-chips span { font-size: 12px; padding: 3px 9px; border: 1px solid #D8D2C2; border-radius: 100px; }
+  .page .doc-inline { font-size: 13px; line-height: 1.6; }
+
+  /* Модерен */
+  .page.moderen .doc-name { color: #16402F; }
+  .page.moderen .doc-label { color: #C6603A; }
+  .page.moderen .doc-rule { background: #16402F; height: 2px; }
+  .page.moderen .doc-chips span { border-color: #16402F; color: #16402F; }
+
+  /* Компактен */
+  .page.kompakten { padding: 14mm 16mm; }
+  .page.kompakten .doc-name { font-size: 28px; }
+  .page.kompakten .doc-label { margin: 14px 0 6px; }
+  .page.kompakten .doc-entry { margin-bottom: 9px; }
+  .page.kompakten .doc-text,
+  .page.kompakten .doc-bullets { font-size: 12px; line-height: 1.5; }
+
+  .letter-page { font-size: 13.5px; line-height: 1.8; white-space: pre-line; }
+  .letter-page h2 { font-family: var(--font-display); font-size: 26px; margin-bottom: 18px; font-weight: 400; }
+</style>
+
+<script>
+  import { activeCV, load } from '../lib/store';
+  import { renderCvDocument, escapeHtml } from '../lib/render';
+
+  const params = new URLSearchParams(location.search);
+  const state = load();
+  const cv = state.cvs.find((item) => item.id === params.get('cv')) ?? activeCV(state);
+
+  const page = document.querySelector<HTMLElement>('[data-page]')!;
+  const letterPage = document.querySelector<HTMLElement>('[data-letter-page]')!;
+  const picker = document.querySelector<HTMLSelectElement>('[data-template]')!;
+  const withLetter = document.querySelector<HTMLInputElement>('[data-with-letter]')!;
+
+  document.querySelector<HTMLElement>('[data-title]')!.textContent = cv.name;
+  document.title = `${cv.contact.name || cv.name} — CV`;
+  page.innerHTML = renderCvDocument(cv);
+
+  const stored = (() => {
+    try { return localStorage.getItem('cvbot.template') ?? 'klasicheski'; } catch { return 'klasicheski'; }
+  })();
+  picker.value = stored;
+
+  const applyTemplate = (id: string) => {
+    page.className = `page ${id}`;
+    try { localStorage.setItem('cvbot.template', id); } catch { /* private mode */ }
+  };
+  applyTemplate(stored);
+  picker.addEventListener('change', () => applyTemplate(picker.value));
+
+  if (cv.coverLetter) {
+    letterPage.innerHTML = `<h2>Мотивационно писмо</h2>${escapeHtml(cv.coverLetter)}`;
+  } else {
+    withLetter.disabled = true;
+    withLetter.parentElement?.setAttribute('title', 'Няма генерирано писмо за това CV.');
+  }
+
+  withLetter.addEventListener('change', () => {
+    if (withLetter.checked && cv.coverLetter) letterPage.removeAttribute('hidden');
+    else letterPage.setAttribute('hidden', '');
+  });
+
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+
+  // Opening this page from the chat/CV screens means "download now".
+  if (params.has('cv')) window.setTimeout(() => window.print(), 600);
+</script>

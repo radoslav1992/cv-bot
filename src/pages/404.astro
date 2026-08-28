@@ -1,0 +1,23 @@
+---
+import Marketing from '../layouts/Marketing.astro';
+export const prerender = true;
+---
+<Marketing title="Страницата не е намерена — CV Bot">
+  <main class="shell wrap">
+    <div class="code display">404</div>
+    <h1 class="display">Тази страница я няма</h1>
+    <p>Възможно е линкът да е стар или адресът да е сгрешен. Върни се към началото или отвори чата.</p>
+    <div class="actions">
+      <a class="btn btn-primary btn-lg" href="/">Към началото</a>
+      <a class="btn btn-outline btn-lg" href="/chat">Отвори чата</a>
+    </div>
+  </main>
+</Marketing>
+
+<style>
+  .wrap { padding: 120px 32px 140px; max-width: 620px; text-align: center; }
+  .code { font-size: 88px; color: var(--accent); line-height: 1; margin-bottom: 12px; }
+  h1 { font-size: 44px; margin-bottom: 14px; }
+  p { font-size: 17px; line-height: 1.6; color: var(--muted); margin-bottom: 32px; }
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+</style>

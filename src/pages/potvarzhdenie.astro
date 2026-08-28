@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import AuthScreen from '../components/AuthScreen.astro';
+export const prerender = true;
+---
+<Base title="Потвърди имейла си — CV Bot">
+  <AuthScreen
+    mode="verify"
+    title="Потвърди имейла си"
+    sub="Изпратихме 6-цифрен код на maria@mail.bg. Въведи го, за да активираш профила."
+    cta="Потвърди"
+    fields={[{ name: 'code', label: 'Код за потвърждение', type: 'text', placeholder: '0 0 0 0 0 0', autocomplete: 'one-time-code' }]}
+    altText="Не получи кода?"
+    altLink="Изпрати отново"
+    altHref="/potvarzhdenie"
+  />
+</Base>

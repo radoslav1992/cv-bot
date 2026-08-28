@@ -1,0 +1,51 @@
+---
+interface Props {
+  score: number;
+  size?: number;
+  /** Colour of the filled arc. */
+  fill?: string;
+  /** Colour of the remaining arc. */
+  track?: string;
+  /** Inner disc colour — matches whatever surface the ring sits on. */
+  inner?: string;
+  id?: string;
+}
+const {
+  score,
+  size = 96,
+  fill = 'var(--green)',
+  track = 'var(--line)',
+  inner = 'var(--surface)',
+  id,
+} = Astro.props;
+
+const clamped = Math.max(0, Math.min(100, Math.round(score)));
+const innerSize = Math.round(size * 0.77);
+---
+<div
+  class="ring"
+  data-score-ring={id}
+  role="img"
+  aria-label={`ATS резултат ${clamped} от 100`}
+  style={`width:${size}px;height:${size}px;background:conic-gradient(${fill} 0 ${clamped}%, ${track} ${clamped}% 100%)`}>
+  <div class="disc" style={`width:${innerSize}px;height:${innerSize}px;background:${inner};font-size:${Math.round(size * 0.32)}px`}>
+    <span data-score-value>{clamped}</span>
+  </div>
+</div>
+
+<style>
+  .ring {
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: background .4s ease;
+  }
+  .disc {
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    line-height: 1;
+  }
+</style>

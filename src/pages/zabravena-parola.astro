@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import AuthScreen from '../components/AuthScreen.astro';
+export const prerender = true;
+---
+<Base title="Забравена парола — CV Bot">
+  <AuthScreen
+    mode="forgot"
+    title="Забравена парола"
+    sub="Въведи имейла си и ще изпратим линк за нова парола. Валиден е 60 минути."
+    cta="Изпрати линк"
+    fields={[{ name: 'email', label: 'Имейл', type: 'email', placeholder: 'maria@mail.bg', autocomplete: 'email' }]}
+    altText="Сети се паролата?"
+    altLink="Обратно към вход"
+    altHref="/vhod"
+  />
+</Base>

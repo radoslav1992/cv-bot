@@ -1,0 +1,242 @@
+---
+import Logo from '../components/Logo.astro';
+
+export interface AuthField {
+  name: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  autocomplete?: string;
+}
+
+interface Props {
+  title: string;
+  sub: string;
+  cta: string;
+  fields: AuthField[];
+  social?: boolean;
+  isLogin?: boolean;
+  isRegister?: boolean;
+  altText: string;
+  altLink: string;
+  altHref: string;
+  /** Where a successful submit lands. */
+  next?: string;
+  mode: 'login' | 'register' | 'forgot' | 'reset' | 'verify';
+}
+
+const {
+  title, sub, cta, fields, social = false, isLogin = false, isRegister = false,
+  altText, altLink, altHref, next = '/tablo', mode,
+} = Astro.props;
+---
+<div class="auth">
+  <div class="pane">
+    <div class="form-wrap">
+      <div class="brand"><Logo size={30} /></div>
+      <h1 class="display">{title}</h1>
+      <p class="sub">{sub}</p>
+
+      {social && (
+        <div>
+          <div class="social">
+            <button class="btn btn-soft" type="button" data-social="Google">Продължи с Google</button>
+            <button class="btn btn-soft" type="button" data-social="LinkedIn">Продължи с LinkedIn</button>
+          </div>
+          <div class="divider">
+            <i></i><span>или с имейл</span><i></i>
+          </div>
+        </div>
+      )}
+
+      <form data-auth-form data-mode={mode} data-next={next} novalidate>
+        <div class="fields">
+          {fields.map((field) => (
+            <label class="field">
+              <span>{field.label}</span>
+              <input
+                class="input"
+                type={field.type}
+                name={field.name}
+                placeholder={field.placeholder}
+                autocomplete={field.autocomplete}
+                required
+              />
+            </label>
+          ))}
+        </div>
+
+        {isLogin && (
+          <div class="row-between">
+            <label class="remember"><input type="checkbox" name="remember" checked />Запомни ме</label>
+            <a href="/zabravena-parola">Забравена парола?</a>
+          </div>
+        )}
+
+        <p class="error" data-auth-error hidden></p>
+        <p class="notice" data-auth-notice hidden></p>
+
+        <button class="btn btn-primary btn-block" type="submit" style="padding:15px;font-size:16px;border-radius:12px">{cta}</button>
+      </form>
+
+      {isRegister && (
+        <p class="terms">
+          Със създаването на профил приемате <a href="/pravna/obshti-usloviya">Общите условия</a> и
+          <a href="/pravna/poveritelnost"> Политиката за поверителност</a>.
+        </p>
+      )}
+
+      <div class="alt">
+        {altText} <a href={altHref}>{altLink}</a>
+      </div>
+
+      <div class="quick">
+        <a href="/vhod">Вход</a>
+        <a href="/registraciya">Регистрация</a>
+        <a href="/zabravena-parola">Забравена парола</a>
+        <a href="/nova-parola">Нова парола</a>
+        <a href="/potvarzhdenie">Потвърждение</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="aside">
+    <blockquote>
+      <p class="display">„Пуснах адаптирано CV за три обяви. Обадиха ми се от две.“</p>
+      <footer>Николай Д., QA инженер</footer>
+    </blockquote>
+    <ul>
+      <li><span aria-hidden="true">✓</span>Първото CV е безплатно</li>
+      <li><span aria-hidden="true">✓</span>Данните ти не се използват за обучение</li>
+      <li><span aria-hidden="true">✓</span>Изтриване на профила с един клик</li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  .auth { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+  .pane { display: flex; align-items: center; justify-content: center; padding: 48px; }
+  .form-wrap { width: 100%; max-width: 400px; }
+  .brand { margin-bottom: 40px; }
+  h1 { font-size: 40px; line-height: 1.1; letter-spacing: -.02em; margin-bottom: 10px; }
+  .sub { font-size: 16px; line-height: 1.6; color: var(--muted); margin-bottom: 32px; }
+
+  .social { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .social .btn { padding: 13px; font-size: 15px; border-radius: var(--r-md); color: var(--ink); }
+  .divider { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  .divider i { flex: 1; height: 1px; background: var(--line); }
+  .divider span { font-size: 13px; color: var(--muted-3); }
+
+  .fields { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .row-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 14px; }
+  .remember { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .row-between a { color: var(--accent); }
+
+  .error, .notice { font-size: 14px; line-height: 1.5; margin-bottom: 16px; padding: 12px 14px; border-radius: var(--r-md); }
+  .error { background: var(--tint-peach); color: var(--accent); }
+  .notice { background: var(--tint-green); color: var(--green); }
+
+  .terms { font-size: 13px; line-height: 1.6; color: var(--muted-3); margin-top: 16px; }
+  .terms a { color: var(--accent); }
+  .alt { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+  .alt a { color: var(--accent); }
+  .quick { margin-top: 20px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; }
+  .quick a { color: var(--muted-4); }
+
+  .aside {
+    background: var(--green);
+    color: var(--on-green);
+    padding: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  blockquote { margin: 0; max-width: 440px; }
+  blockquote p { font-size: 38px; line-height: 1.2; letter-spacing: -.015em; margin-bottom: 28px; }
+  blockquote footer { font-size: 15px; color: var(--green-soft-2); }
+  .aside ul { list-style: none; margin: 56px 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; font-size: 15px; color: var(--green-soft); }
+  .aside li { display: flex; gap: 10px; }
+  .aside li span { color: var(--peach); }
+
+  @media (max-width: 900px) {
+    .auth { grid-template-columns: 1fr; }
+    .aside { padding: 40px 32px 56px; }
+    blockquote p { font-size: 28px; }
+    .aside ul { margin-top: 32px; }
+    .pane { padding: 40px 24px; }
+  }
+</style>
+
+<script>
+  import { load, update, initials } from '../lib/store';
+
+  const form = document.querySelector<HTMLFormElement>('[data-auth-form]');
+  const errorBox = document.querySelector<HTMLElement>('[data-auth-error]');
+  const noticeBox = document.querySelector<HTMLElement>('[data-auth-notice]');
+
+  const show = (el: HTMLElement | null, message: string) => {
+    if (!el) return;
+    el.textContent = message;
+    el.removeAttribute('hidden');
+  };
+  const hide = (el: HTMLElement | null) => el?.setAttribute('hidden', '');
+
+  document.querySelectorAll<HTMLButtonElement>('[data-social]').forEach((button) => {
+    button.addEventListener('click', () => {
+      show(noticeBox, `Входът през ${button.dataset.social} се свързва при пускане в реална среда. Използвай имейл засега.`);
+    });
+  });
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    hide(errorBox);
+    hide(noticeBox);
+
+    const data = new FormData(form);
+    const mode = form.dataset.mode;
+    const email = String(data.get('email') ?? '').trim();
+    const name = String(data.get('name') ?? '').trim();
+    const password = String(data.get('password') ?? '');
+    const password2 = String(data.get('password2') ?? '');
+    const code = String(data.get('code') ?? '').trim();
+
+    const needsEmail = mode === 'login' || mode === 'register' || mode === 'forgot';
+    if (needsEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return show(errorBox, 'Въведи валиден имейл адрес.');
+    }
+    if (mode === 'register' && name.length < 3) {
+      return show(errorBox, 'Въведи име и фамилия.');
+    }
+    if ((mode === 'login' || mode === 'register') && password.length < 8) {
+      return show(errorBox, 'Паролата трябва да е поне 8 символа.');
+    }
+    if (mode === 'reset') {
+      if (password.length < 8 || !/\d/.test(password)) return show(errorBox, 'Паролата трябва да е поне 8 символа и да съдържа цифра.');
+      if (password !== password2) return show(errorBox, 'Паролите не съвпадат.');
+    }
+    if (mode === 'verify' && !/^\d[\d\s]{4,}\d$/.test(code)) {
+      return show(errorBox, 'Кодът е 6 цифри.');
+    }
+
+    if (mode === 'forgot') {
+      return show(noticeBox, `Ако има профил с ${email}, изпратихме линк за нова парола. Валиден е 60 минути.`);
+    }
+    if (mode === 'reset') {
+      return show(noticeBox, 'Паролата е записана на това устройство. Влез отново.');
+    }
+
+    update((state) => {
+      const existing = state.user;
+      const finalName = name || existing?.name || 'Потребител';
+      const finalEmail = email || existing?.email || '';
+      state.user = { name: finalName, email: finalEmail, initials: initials(finalName) };
+    });
+
+    window.location.href = form.dataset.next || '/tablo';
+  });
+
+  // Prefill the email on the login screen if this browser already has a session.
+  const existing = load().user;
+  const emailInput = form?.querySelector<HTMLInputElement>('input[name="email"]');
+  if (existing?.email && emailInput && !emailInput.value) emailInput.value = existing.email;
+</script>

@@ -1,0 +1,177 @@
+---
+import App from '../layouts/App.astro';
+---
+<App title="Настройки — CV Bot" active="nastroyki">
+  <div class="head">
+    <h1 class="display">Настройки</h1>
+    <p class="sub">Профил, план, поверителност и износ на данните.</p>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2 class="card-title" style="margin-bottom:18px">Профил</h2>
+      <form class="form" data-profile>
+        <label class="field"><span>Име и фамилия</span><input class="input" name="name" /></label>
+        <label class="field"><span>Имейл</span><input class="input" type="email" name="email" /></label>
+        <button class="btn btn-primary" type="submit">Запази</button>
+        <span class="saved" data-saved hidden>Записано.</span>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title" style="margin-bottom:18px">План</h2>
+      <div class="plan-row">
+        <div>
+          <div class="plan-name" data-plan-title>Безплатен план</div>
+          <div class="plan-meta" data-plan-meta>—</div>
+        </div>
+        <a class="btn btn-primary btn-sm" href="/ceni">Виж плановете</a>
+      </div>
+      <div class="meter" style="margin-top:16px"><i data-usage-meter style="width:0"></i></div>
+      <p class="note" data-plan-note></p>
+      <button class="btn btn-soft btn-sm" type="button" data-toggle-plan style="margin-top:14px">Превключи демо плана</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title" style="margin-bottom:18px">Поверителност</h2>
+      <p class="note">
+        CV-тата и разговорите се пазят в този браузър. Изпращат се към сървъра само докато ботът
+        генерира отговор и не се използват за обучение на модели.
+      </p>
+      <div class="consent">
+        <span>Съгласие за бисквитки: <b data-consent>не е избрано</b></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-reset-consent>Промени</button>
+      </div>
+      <p class="note" style="margin-top:14px">
+        Подробности в <a href="/pravna/poveritelnost">Политиката за поверителност</a> и
+        <a href="/pravna/gdpr">GDPR</a>.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title" style="margin-bottom:18px">Данни</h2>
+      <p class="note">Изнеси всичко в JSON или изтрий локалните данни без заявка до нас (GDPR, чл. 20 и чл. 17).</p>
+      <div class="data-actions">
+        <button class="btn btn-soft btn-sm" type="button" data-export-all>Изтегли всички данни</button>
+        <button class="btn btn-outline btn-sm" type="button" data-wipe style="border-color:var(--accent);color:var(--accent)">Изтрий профила локално</button>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2 class="card-title" style="margin-bottom:18px">AI модели</h2>
+      <p class="note">
+        Приложението работи изцяло върху Cloudflare Workers AI. Разговорът и извикването на инструменти
+        минават през <code>@cf/meta/llama-3.3-70b-instruct-fp8-fast</code>, кратките предложения и
+        пренаписванията — през <code>@cf/meta/llama-3.1-8b-instruct-fast</code>, сравнението на CV с обява
+        използва ембединги <code>@cf/baai/bge-m3</code>, а качените PDF и DOCX се преобразуват с
+        <code>AI.toMarkdown()</code>. ATS скорът се изчислява детерминистично на сървъра, за да е стабилен
+        и обясним — моделът само пише текста около него.
+      </p>
+    </section>
+  </div>
+
+  <div class="toast" data-toast hidden></div>
+</App>
+
+<style>
+  .head { margin-bottom: 28px; }
+  h1 { font-size: 42px; letter-spacing: -.02em; margin-bottom: 6px; }
+  .sub { font-size: 16px; color: var(--muted-2); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .wide { grid-column: span 2; }
+  .form { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+  .form .field { width: 100%; }
+  .saved { font-size: 14px; color: var(--green); }
+
+  .plan-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .plan-name { font-size: 17px; font-weight: 500; }
+  .plan-meta { font-size: 14px; color: var(--muted-3); margin-top: 2px; }
+  .note { font-size: 14px; line-height: 1.65; color: var(--muted); margin-top: 12px; }
+  .note code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: var(--chip); padding: 2px 6px; border-radius: 5px; }
+  .consent { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; font-size: 14px; color: var(--muted); }
+  .data-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: var(--on-green);
+    padding: 12px 20px; border-radius: var(--r-md); font-size: 14px; z-index: 95; box-shadow: var(--shadow-card);
+  }
+
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } h1 { font-size: 32px; } }
+</style>
+
+<script>
+  import { initials, load, reset, update } from '../lib/store';
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s);
+  const toastEl = $('[data-toast]')!;
+  const toast = (message: string) => {
+    toastEl.textContent = message;
+    toastEl.removeAttribute('hidden');
+    window.setTimeout(() => toastEl.setAttribute('hidden', ''), 3000);
+  };
+
+  function paint(): void {
+    const state = load();
+    const form = $<HTMLFormElement>('[data-profile]')!;
+    (form.elements.namedItem('name') as HTMLInputElement).value = state.user?.name ?? '';
+    (form.elements.namedItem('email') as HTMLInputElement).value = state.user?.email ?? '';
+
+    $('[data-plan-title]')!.textContent = state.plan === 'pro' ? 'План Про' : 'Безплатен план';
+    $('[data-plan-meta]')!.textContent =
+      state.plan === 'pro' ? 'Неограничени анализи и адаптирания' : `${state.analysesUsed} от ${state.analysesLimit} анализа този месец`;
+    $('[data-usage-meter]')!.style.width =
+      state.plan === 'pro' ? '100%' : `${Math.min(100, Math.round((state.analysesUsed / Math.max(1, state.analysesLimit)) * 100))}%`;
+    $('[data-plan-note]')!.textContent =
+      state.plan === 'pro'
+        ? 'Абонаментът се подновява автоматично до отказ. Отказът влиза в сила в края на периода.'
+        : 'Безплатният план включва 1 CV чрез разговор и 3 анализа месечно.';
+
+    $('[data-consent]')!.textContent =
+      state.cookieConsent === 'accepted' ? 'всички бисквитки' : state.cookieConsent === 'essential' ? 'само необходимите' : 'не е избрано';
+
+    $('[data-toggle-plan]')!.textContent = state.plan === 'pro' ? 'Върни към безплатния (демо)' : 'Включи Про (демо)';
+  }
+
+  $<HTMLFormElement>('[data-profile]')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.currentTarget as HTMLFormElement;
+    const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
+    update((state) => { state.user = { name, email, initials: initials(name || 'CV') }; });
+    $('[data-saved]')!.removeAttribute('hidden');
+    window.setTimeout(() => $('[data-saved]')!.setAttribute('hidden', ''), 2500);
+    paint();
+  });
+
+  $('[data-toggle-plan]')?.addEventListener('click', () => {
+    update((state) => { state.plan = state.plan === 'pro' ? 'free' : 'pro'; });
+    paint();
+    toast('Планът е сменен в това демо.');
+  });
+
+  $('[data-reset-consent]')?.addEventListener('click', () => {
+    update((state) => { state.cookieConsent = null; });
+    paint();
+    toast('Банерът ще се появи отново при следващото зареждане.');
+  });
+
+  $('[data-export-all]')?.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(load(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cvbot-danni.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+
+  $('[data-wipe]')?.addEventListener('click', () => {
+    if (!confirm('Да изтрием ли всички CV-та, разговори и кандидатури от този браузър? Действието е необратимо.')) return;
+    reset();
+    window.location.href = '/';
+  });
+
+  paint();
+</script>

@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import AuthScreen from '../components/AuthScreen.astro';
+export const prerender = true;
+---
+<Base title="Вход — CV Bot">
+  <AuthScreen
+    mode="login"
+    title="Влез в профила си"
+    sub="Продължи там, където спря."
+    cta="Вход"
+    social
+    isLogin
+    fields={[
+      { name: 'email', label: 'Имейл', type: 'email', placeholder: 'maria@mail.bg', autocomplete: 'email' },
+      { name: 'password', label: 'Парола', type: 'password', placeholder: '••••••••', autocomplete: 'current-password' },
+    ]}
+    altText="Още нямаш профил?"
+    altLink="Регистрирай се"
+    altHref="/registraciya"
+  />
+</Base>

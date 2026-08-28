@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Типове, тестове и билд
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: TypeScript
+        run: npm run check
+
+      - name: Тестове
+        run: npm test
+
+      - name: Билд
+        run: npm run build
+
+      # Bundles and validates the Worker exactly as `deploy` would, but without
+      # touching the account — so a broken binding or oversized bundle fails the
+      # PR instead of the deploy.
+      - name: Проверка на Worker бъндъла
+        run: npx wrangler deploy --dry-run

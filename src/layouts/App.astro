@@ -1,0 +1,110 @@
+---
+import Base from './Base.astro';
+import AppSidebar from '../components/AppSidebar.astro';
+
+interface Props {
+  title: string;
+  active: 'tablo' | 'chat' | 'cv' | 'kandidaturi' | 'shabloni' | 'nastroyki';
+  variant?: 'default' | 'chat';
+  /** The chat screen owns its own scrolling panes. */
+  fullHeight?: boolean;
+}
+const { title, active, variant = 'default', fullHeight = false } = Astro.props;
+---
+<Base title={title} bodyBackground="var(--bg-2)" noScroll={fullHeight}>
+  <div class:list={['app', { tall: fullHeight }]}>
+    <button class="mobile-nav no-print" type="button" data-sidebar-toggle aria-label="Меню">☰</button>
+    <div class="sidebar" data-sidebar>
+      <AppSidebar active={active} variant={variant} />
+    </div>
+    <main class:list={['content', { flush: fullHeight }]}>
+      <slot />
+    </main>
+  </div>
+
+  <style>
+    .app {
+      display: grid;
+      grid-template-columns: 248px 1fr;
+      min-height: 100vh;
+      background: var(--bg-2);
+    }
+    .app.tall { height: 100vh; min-height: 0; overflow: hidden; }
+    .sidebar { display: contents; }
+    .content { padding: 36px 40px 56px; overflow: auto; }
+    .content.flush { padding: 0; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 14px; left: 14px;
+      z-index: 60;
+      width: 40px; height: 40px;
+      border-radius: 11px;
+      border: 1px solid var(--line-3);
+      background: var(--surface);
+      color: var(--green);
+      font-size: 17px;
+      cursor: pointer;
+    }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: block; position: fixed; inset: 0 auto 0 0; width: 248px; z-index: 70; transform: translateX(-100%); transition: transform .2s ease; }
+      .sidebar > :global(aside) { height: 100%; }
+      .sidebar.open { transform: none; box-shadow: 0 0 0 100vmax rgba(20,33,28,.35); }
+      .mobile-nav { display: block; }
+      .content { padding: 68px 20px 40px; }
+      .content.flush { padding: 0; }
+    }
+  </style>
+
+  <script>
+    const sidebar = document.querySelector<HTMLElement>('[data-sidebar]');
+    document.querySelector('[data-sidebar-toggle]')?.addEventListener('click', () => sidebar?.classList.toggle('open'));
+    document.addEventListener('click', (event) => {
+      if (!sidebar?.classList.contains('open')) return;
+      const target = event.target as HTMLElement;
+      if (!sidebar.contains(target) && !target.closest('[data-sidebar-toggle]')) sidebar.classList.remove('open');
+    });
+  </script>
+
+  <script>
+    import { load, initials } from '../lib/store';
+
+    const state = load();
+    const user = state.user;
+    if (user) {
+      document.querySelectorAll<HTMLElement>('[data-user-name]').forEach((el) => { el.textContent = user.name; });
+      document.querySelectorAll<HTMLElement>('[data-user-initials]').forEach((el) => {
+        el.textContent = user.initials || initials(user.name);
+      });
+    }
+
+    const used = state.analysesUsed;
+    const limit = state.analysesLimit;
+    const planName = document.querySelector<HTMLElement>('[data-plan-name]');
+    const planUsage = document.querySelector<HTMLElement>('[data-plan-usage]');
+    const planMeter = document.querySelector<HTMLElement>('[data-plan-meter]');
+    const planCta = document.querySelector<HTMLElement>('[data-plan-cta]');
+
+    if (planName) planName.textContent = state.plan === 'pro' ? 'План Про' : 'Безплатен план';
+    if (planUsage) {
+      planUsage.textContent = state.plan === 'pro'
+        ? 'Неограничени анализи и адаптирания'
+        : `${used} от ${limit} анализа използвани този месец`;
+    }
+    if (planMeter) planMeter.style.width = state.plan === 'pro' ? '100%' : `${Math.min(100, Math.round((used / Math.max(1, limit)) * 100))}%`;
+    if (planCta && state.plan === 'pro') planCta.textContent = 'Управлявай абонамента';
+
+    document.querySelectorAll<HTMLElement>('[data-recent-list]').forEach((list) => {
+      if (!state.threads.length) return;
+      list.innerHTML = '';
+      for (const thread of state.threads.slice(0, 6)) {
+        const link = document.createElement('a');
+        link.className = `recent${thread.id === state.activeThreadId ? ' current' : ''}`;
+        link.href = `/chat?thread=${encodeURIComponent(thread.id)}`;
+        link.textContent = thread.title;
+        list.append(link);
+      }
+    });
+  </script>
+</Base>
