@@ -1,4 +1,5 @@
 import type { Application, CV } from './types';
+import type { CvTemplate } from './cvTemplates';
 
 export function emptyCV(name = 'Ново CV'): CV {
   const now = new Date().toISOString();
@@ -17,6 +18,16 @@ export function emptyCV(name = 'Ново CV'): CV {
     projects: [],
     certificates: [],
   };
+}
+
+/** Start a CV from a ready-made template. Only the target position is filled
+ *  in — the person chose it by picking the template. Everything else stays
+ *  empty and gets answered in the chat, one question at a time. */
+export function cvFromTemplate(template: CvTemplate): CV {
+  const cv = emptyCV(template.name);
+  cv.templateId = template.id;
+  cv.contact.title = template.targetTitle;
+  return cv;
 }
 
 /** The worked example from the design handoff — used to seed a fresh browser so
@@ -154,6 +165,7 @@ export function coerceCV(input: unknown): CV {
         }
       : undefined,
     coverLetter: asString(raw.coverLetter) || undefined,
+    templateId: asString(raw.templateId) || undefined,
     sourceFormatFlags: raw.sourceFormatFlags && typeof raw.sourceFormatFlags === 'object' ? raw.sourceFormatFlags : undefined,
   };
 }

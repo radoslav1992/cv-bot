@@ -1,11 +1,34 @@
 ---
 import App from '../layouts/App.astro';
 import { DOC_TEMPLATES, STARTERS } from '../lib/templates';
+import { CV_TEMPLATES } from '../lib/cvTemplates';
 ---
 <App title="Шаблони — CV Bot" active="shabloni">
   <div class="head">
     <h1 class="display">Шаблони</h1>
-    <p class="sub">Оформление за документа и готови начала за разговора с бота.</p>
+    <p class="sub">Избери готов шаблон за твоята роля. Структурата е налице — ботът пита, ти отговаряш.</p>
+  </div>
+
+  <h2 class="section">Готови CV шаблони</h2>
+  <p class="section-lede">
+    Всеки шаблон носи подредбата на секциите, готовите въпроси и предложени умения за ролята.
+    Отговаряш на кратки въпроси и CV-то се попълва само.
+  </p>
+  <div class="cv-templates">
+    {CV_TEMPLATES.map((template) => (
+      <a class="cv-template" href={`/chat?template=${template.id}`}>
+        <div class="cv-template-head">
+          <span class="cat">{template.category}</span>
+          <span class="steps">{template.fields.filter((f) => !f.optional).length} въпроса</span>
+        </div>
+        <h3>{template.name}</h3>
+        <p class="aud">{template.audience}</p>
+        <div class="skills">
+          {template.suggestedSkills.slice(0, 5).map((skill) => <span>{skill}</span>)}
+        </div>
+        <span class="start">Започни →</span>
+      </a>
+    ))}
   </div>
 
   <h2 class="section">Оформление на документа</h2>
@@ -29,7 +52,8 @@ import { DOC_TEMPLATES, STARTERS } from '../lib/templates';
     ))}
   </div>
 
-  <h2 class="section">Начала за разговор</h2>
+  <h2 class="section">Свободен разговор</h2>
+  <p class="section-lede">Без готова структура — за случаите, които не се вписват в шаблон.</p>
   <div class="starters">
     {STARTERS.map((starter) => (
       <div class="starter">
@@ -46,7 +70,53 @@ import { DOC_TEMPLATES, STARTERS } from '../lib/templates';
   .head { margin-bottom: 28px; }
   h1 { font-size: 42px; letter-spacing: -.02em; margin-bottom: 6px; }
   .sub { font-size: 16px; color: var(--muted-2); }
-  .section { font-family: var(--font-display); font-size: 26px; margin: 8px 0 16px; }
+  .section { font-family: var(--font-display); font-size: 26px; margin: 8px 0 10px; }
+  .section-lede { font-size: 15px; line-height: 1.6; color: var(--muted); margin-bottom: 20px; max-width: 620px; }
+
+  .cv-templates {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+    gap: 14px;
+    margin-bottom: 44px;
+  }
+  .cv-template {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 20px;
+    color: inherit;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .cv-template:hover { border-color: var(--green); transform: translateY(-2px); color: inherit; }
+  .cv-template-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
+  .cat {
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .steps {
+    font-size: 12px;
+    color: var(--muted-3);
+    background: var(--bg-2);
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    white-space: nowrap;
+  }
+  .cv-template h3 { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+  .aud { font-size: 14px; line-height: 1.55; color: var(--muted); margin-bottom: 14px; }
+  .skills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+  .skills span {
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: var(--tint-green);
+    color: var(--green);
+  }
+  .start { font-size: 14px; color: var(--accent); margin-top: auto; }
 
   .templates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 44px; }
   .template {

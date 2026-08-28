@@ -5,6 +5,7 @@ import { REPLIES_SYSTEM, SYSTEM_PROMPT, cvContext } from '../../lib/prompts';
 import { TOOL_DEFINITIONS, executeTool } from '../../lib/tools';
 import { coerceCV } from '../../lib/cv';
 import { scoreCV } from '../../lib/ats';
+import { flowProgress, suggestionsFor } from '../../lib/flow';
 import type { CV } from '../../lib/types';
 
 export const prerender = false;
@@ -24,6 +25,12 @@ function frame(event: Record<string, unknown>): Uint8Array {
 }
 
 function fallbackReplies(cv: CV): string[] {
+  // Inside a template the conversation is a script: offer its prepared answers
+  // and nothing else. No suggestions for a step means the person simply types
+  // — free-form starters here would derail the flow.
+  const progress = flowProgress(cv);
+  if (progress) return suggestionsFor(progress);
+
   if (!cv.contact.title) return ['Създай CV от нула', 'Анализирай моето CV', 'Адаптирай към обява'];
   if (!cv.experience.length) return ['Разкажи за последната работа', 'Пропусни — качи старо CV'];
   if (!cv.education.length) return ['Образование и езици', 'Адаптирай към обява', 'Готово, изтегли PDF'];
@@ -152,6 +159,15 @@ export const POST: APIRoute = async (context) => {
 
       async function pushReplies(ctrl: ReadableStreamDefaultController<Uint8Array>, botText: string) {
         let items = fallbackReplies(cv);
+
+        // On a scripted template the prepared answers replace generated ones,
+        // and skipping the extra model call makes the turn cheaper too.
+        const progress = flowProgress(cv);
+        if (progress) {
+          ctrl.enqueue(frame({ type: 'replies', items: suggestionsFor(progress) }));
+          return;
+        }
+
         try {
           const { text } = await runCompletion(env, {
             model: fastModel(env),
