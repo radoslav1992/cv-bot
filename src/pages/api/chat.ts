@@ -97,7 +97,7 @@ export const POST: APIRoute = async (context) => {
             break;
           }
 
-          messages.push({ role: 'assistant', content: text || '' });
+          messages.push({ role: 'assistant', content: text || '', toolCalls });
 
           for (const call of toolCalls) {
             const outcome = await executeTool(call.name, call.args, { env, cv });

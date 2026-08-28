@@ -27,15 +27,26 @@
 
 Всички се извикват през `AI` binding-а — няма външен доставчик.
 
-| Задача | Модел | Файл |
+| Задача | Модел | Променлива |
 | --- | --- | --- |
-| Разговор + инструменти | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | `src/lib/ai.ts` |
-| Бързи предложения, пренаписвания, извличане | `@cf/meta/llama-3.1-8b-instruct-fast` | `src/lib/ai.ts` |
-| Смислово сходство CV ↔ обява | `@cf/baai/bge-m3` | `src/lib/ai.ts` |
-| PDF/DOCX → Markdown | `AI.toMarkdown()` | `src/lib/extract.ts` |
+| Разговор + инструменти | `openai/gpt-5.6-luna` | `CVBOT_CHAT_MODEL` |
+| Кратки предложения, пренаписвания, извличане | `openai/gpt-5.6-luna` | `CVBOT_FAST_MODEL` |
+| Смислово сходство CV ↔ обява | `@cf/baai/bge-m3` | `CVBOT_EMBEDDING_MODEL` |
+| PDF/DOCX → Markdown | `AI.toMarkdown()` | — |
 
-Моделите се сменят през `vars` в `wrangler.jsonc` (`CVBOT_CHAT_MODEL`, `CVBOT_FAST_MODEL`,
-`CVBOT_EMBEDDING_MODEL`) без промяна в кода.
+**Смяна на модел.** Всичките са обикновени променливи — сменят се в `vars` в
+`wrangler.jsonc` или направо от Cloudflare dashboard (**Settings → Variables and
+Secrets**), без промяна в кода и без нов билд.
+
+GPT-5.6 Luna работи през **Responses API** (`input` / `instructions`), а моделите с
+префикс `@cf/…` — през chat completions. `src/lib/ai.ts` съдържа адаптер, който
+разпознава диалекта по идентификатора на модела и превежда заявката, инструментите,
+отговора и стрийма. Тоест `CVBOT_CHAT_MODEL` може да се смени на
+`@cf/meta/llama-3.3-70b-instruct-fp8-fast` и всичко продължава да работи.
+Ако някой модел не следва правилото, `CVBOT_MODEL_DIALECT` го налага ръчно
+(`auto` по подразбиране, иначе `chat` или `responses`).
+
+Ембедингите остават на `@cf/baai/bge-m3` — Luna не прави ембединги.
 
 **ATS скорът не се генерира от модел.** `src/lib/ats.ts` го изчислява детерминистично по
 структура, ключови думи, измерими резултати, четимост и формат — за да е стабилен,
@@ -80,16 +91,13 @@ npm run check          # TypeScript
 npm run deploy         # astro build && wrangler deploy
 ```
 
-### През GitHub
+### През GitHub (Cloudflare Workers Builds)
 
-Има два начина. **Избери един** — ако включиш и двата, всеки push ще деплойва два пъти.
-
-#### Вариант А — Cloudflare Workers Builds (без секрети в GitHub)
-
-Cloudflare се свързва директно с репозиторито и билдва при всеки push.
+Cloudflare се свързва директно с репозиторито и билдва при всеки push — няма нужда от
+API токени в GitHub.
 
 1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Import a repository**.
-2. Избери `cv-bot` и клона, от който да се деплойва (`main`).
+2. Оторизирай GitHub, избери `cv-bot` и клона за продукция (`main`).
 3. Настройки на билда:
 
    | Поле | Стойност |
@@ -98,31 +106,15 @@ Cloudflare се свързва директно с репозиторито и �
    | Build command | `npm run build` |
    | Deploy command | `npx wrangler deploy` |
 
-   Версията на Node се взима от `.node-version` (22).
-4. Готово. Всеки push към `main` деплойва; за pull request Cloudflare качва preview версия с отделен URL.
+   Версията на Node се взима от `.node-version` (22). Binding-ите и променливите идват
+   от `wrangler.jsonc` — нищо не се настройва повторно в интерфейса.
+4. Всеки push към `main` деплойва. За pull request Cloudflare качва preview версия с
+   отделен URL.
 
-При този вариант изтрий `.github/workflows/deploy.yml` (или го остави само на
-`workflow_dispatch`), за да няма двоен деплой. `ci.yml` остава полезен —
-проверява типовете, тестовете и бъндъла на всеки PR.
-
-#### Вариант Б — GitHub Actions
-
-`.github/workflows/deploy.yml` деплойва при push към `main` и ръчно от
-**Actions → Deploy → Run workflow**. Преди първия път добави два секрета в
-**Settings → Secrets and variables → Actions → New repository secret**:
-
-| Секрет | Откъде |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → **API Tokens** → Create Token → шаблон **Edit Cloudflare Workers** |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → колоната вдясно, **Account ID** |
-
-Workflow-ът пуска тестовете и билда, преди да деплойва, и записва URL-а на
-Worker-а в GitHub Deployments. Ако секрет липсва, първата стъпка спира с ясно
-съобщение вместо да се провали по средата.
-
-`.github/workflows/ci.yml` върви на всеки pull request: TypeScript, тестове, билд
-и `wrangler deploy --dry-run` — така счупен binding или прекалено голям бъндъл
-падат на PR-а, не при деплоя. Не иска секрети и работи и от форк.
+`.github/workflows/ci.yml` върви успоредно на всеки pull request: TypeScript, тестове,
+билд и `wrangler deploy --dry-run` — така счупен binding или прекалено голям бъндъл
+падат на PR-а, преди Cloudflare изобщо да опита деплой. Не иска секрети и работи и от
+форк.
 
 ## Как е устроено
 
@@ -169,5 +161,9 @@ CV-тата, разговорите и кандидатурите живеят �
   продуктов guard-rail в браузъра, не платежна интеграция.
 - **PDF-ът** се получава през диалога за печат на браузъра (`Запази като PDF`), а не през
   генератор на сървъра — така кирилицата излиза правилно без вграждане на шрифтове.
-- Пътят с истински модел е тестван само чрез мокнат binding (`test/ai.test.ts`); за
-  проверка с реални отговори е нужен Cloudflare акаунт.
+- Пътят с истински модел е тестван само чрез мокнат binding (`test/ai.test.ts`,
+  `test/dialect.test.ts`). Адаптерът за Responses API е написан по спецификацията и по
+  примера в документацията на Cloudflare, но първият реален деплой е това, което ще го
+  потвърди. Ако Luna върне неочакван формат, `CVBOT_CHAT_MODEL` се сменя на
+  `@cf/meta/llama-3.3-70b-instruct-fp8-fast` от dashboard-а и приложението продължава да
+  работи веднага.
